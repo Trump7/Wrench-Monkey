@@ -6,6 +6,7 @@ import Manual from "../Pages/Manual";
 import Login from "../Pages/Login";
 import Register from "../Pages/Register";
 import Manager from "../Pages/Manager";
+import PrivateRoute from '../components/PrivateRoute';
 
 const router = createBrowserRouter([
     {
@@ -16,8 +17,8 @@ const router = createBrowserRouter([
             {path: "/about", element: <About/>},
             {path: "/manual", element: <Manual/>},
             {path: "/login", element: <Login/>},
-            {path: "/sign-up", element: <Register/>},
-            {path: "/manager", element: <Manager/>},
+            {path: "/register", element: <Register/>},
+            {path: "/manager", element: <PrivateRoute><Manager/></PrivateRoute>},
         ]
     },
 ]);

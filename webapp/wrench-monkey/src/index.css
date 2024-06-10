@@ -1,3 +1,10 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@font-face {
+    font-family: 'Nico Moji';
+    src: url('./fonts/NicoMoji.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }

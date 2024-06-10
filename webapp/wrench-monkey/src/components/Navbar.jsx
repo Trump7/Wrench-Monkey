@@ -2,6 +2,8 @@ import React from 'react';
 import logo from '../../src/assets/logo.jpg';
 import { NavLink } from 'react-router-dom';
 import Button from './Button'; // Import the Button component
+import { isAuthenticated } from '../utilities/auth';
+import Cookies from 'js-cookie';
 import '../index.css';
 
 const Navbar = () => {
@@ -9,6 +11,8 @@ const Navbar = () => {
         { path: "/About", title: "About Us" },
         { path: "/Manual", title: "Manual" },
     ];
+
+    const authenticated = isAuthenticated();
 
     return (
         <header style={{ backgroundColor: '#00001B' }}>
@@ -29,12 +33,21 @@ const Navbar = () => {
                             <NavLink
                                 to={path}
                                 className="text-white hover:text-gray-300"
-                                activeClassName="text-blue-500 font-bold"
-                            >
+                                activeClassName="text-blue-500 font-bold">
                                 {title}
                             </NavLink>
                         </li>
                     ))}
+                    {authenticated && (
+                        <li>
+                            <NavLink
+                                to="/manager"
+                                className="text-white hover:text-gray-300"
+                                activeClassName="text-blue-500 font-bold">
+                                Manager
+                            </NavLink>
+                        </li>
+                    )}
                 </ul>
 
                 {/* Space between Nav Links and Buttons */}
@@ -42,12 +55,23 @@ const Navbar = () => {
 
                 {/* Buttons Component Aligned to the Right */}
                 <div className="flex items-center space-x-4 font-custom mr-8">
-                    <Button href="/login" text="Log In" />
-                    <Button href="/sign-up" text="Sign Up" />
+                    {authenticated ? (
+                        <Button onClick={handleLogout} text="Log Out" />
+                    ) : (
+                        <>
+                            <Button to="/login" text="Log In" />
+                            <Button to="/register" text="Register" />
+                        </>
+                    )}
                 </div>
             </nav>
         </header>
     );
+};
+
+const handleLogout = () => {
+    Cookies.remove('token');
+    window.location.reload();
 };
 
 export default Navbar;

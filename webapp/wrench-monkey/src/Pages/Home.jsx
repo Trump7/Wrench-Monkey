@@ -27,7 +27,7 @@ const Home = () => {
                 {/* Banner */}
                 <div className="mt-8 bg-gray-800 py-4 text-center font-custom">
                     <p className="text-xl mb-2">Already have a monkey?</p>
-                    <Button href="/login" text="Go To Manager" />
+                    <Button to="/login" text="Go To Manager" />
                 </div>
             </div>
         </div>
