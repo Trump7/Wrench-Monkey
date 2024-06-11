@@ -1,11 +1,25 @@
-import React from 'react'
+import React from 'react';
+import Tools from '../components/Tools';
+import CurrentStatus from '../components/CurrentStatus';
+import History from '../components/History';
+import '../index.css';
 
 const Manager = () => {
     return (
-        <div style={{backgroundColor: '#00001B'}} className="min-h-screen">
-
+        <div className="bg-[#00001B] min-h-screen flex flex-col items-center pt-20 pb-20">
+            <div className="flex justify-between items-start space-x-8 w-full max-w-6xl">
+                <div className="bg-gray-500 p-4 rounded-lg w-1/3 h-screen">
+                    <Tools />
+                </div>
+                <div className="bg-gray-500 p-4 rounded-lg w-1/3 h-screen">
+                    <CurrentStatus />
+                </div>
+                <div className="bg-gray-500 p-4 rounded-lg w-1/3 h-screen">
+                    <History />
+                </div>
+            </div>
         </div>
-    )
-}
+    );
+};
 
-export default Manager
+export default Manager;
