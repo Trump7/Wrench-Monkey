@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Button from '../components/Button.jsx';
 import Cookies from 'js-cookie';
+import config from '../config.js';
 
 
 const Login = () => {
@@ -15,7 +16,7 @@ const Login = () => {
         e.preventDefault();
         
         try {
-            const response = await axios.post('http://localhost:5000/api/auth/login', { email, pass: password });
+            const response = await axios.post(`${config.apiURL}/auth/login`, { email, pass: password });
             const { token, userId } = response.data;
             // Store token and userId in localStorage or sessionStorage
             console.log('Login successful:', token, userId);

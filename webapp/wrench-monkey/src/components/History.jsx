@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import '../index.css';
+import config from '../config';
 
 const History = () => {
     const [history, setHistory] = useState([]);
@@ -8,7 +9,7 @@ const History = () => {
 
     useEffect(() => {
         const fetchHistory = async () => {
-            const response = await axios.get('http://localhost:5000/api/history');
+            const response = await axios.get(`${config.apiURL}/history`);
             setHistory(response.data);
         };
         fetchHistory();

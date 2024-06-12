@@ -23,4 +23,4 @@ app.use('/api/auth', authRoutes);
 app.use('/api/tools', toolRoutes);
 app.use('/api/history', historyRoutes);
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));

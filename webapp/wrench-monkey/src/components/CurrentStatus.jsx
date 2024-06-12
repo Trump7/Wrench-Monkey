@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import '../index.css';
+import config from '../config';
 
 const CurrentStatus = () => {
     const [status, setStatus] = useState([]);
 
     useEffect(() => {
         const fetchStatus = async () => {
-            const response = await axios.get('http://localhost:5000/api/status');
+            const response = await axios.get(`${config.apiURL}/status`);
             setStatus(response.data);
         };
         fetchStatus();
