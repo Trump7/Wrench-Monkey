@@ -7,6 +7,7 @@ const Tools = () => {
     const [tools, setTools] = useState([]);
     const [showAddPopup, setShowAddPopup] = useState(false);
     const [showRemovePopup, setShowRemovePopup] = useState(false);
+    const [showEditPopup, setShowEditPopup] = useState(false);
     const [newTool, setNewTool] = useState({
         name: '',
         status: '',
@@ -14,6 +15,13 @@ const Tools = () => {
         slot: ''
     });
     const [toolToRemove, setToolToRemove] = useState(null);
+    const [toolToEdit, setToolToEdit] = useState({
+        id: null,
+        name: '',
+        status: '',
+        rfid: '',
+        slot: ''
+    });
 
     useEffect(() => {
         const fetchTools = async () => {
@@ -39,14 +47,9 @@ const Tools = () => {
     };
 
     const handleRemoveTool = async () => {
-        if (!toolToRemove) {
-            console.error('No tool selected for removal');
-            return;
-        }
-
         try {
             await axios.delete(`${config.apiURL}/tools/${toolToRemove}`);
-            setTools(tools.filter(tool => tool.id !== toolToRemove));
+            setTools(tools.filter(tool => tool._id !== toolToRemove));
             setShowRemovePopup(false);
             setToolToRemove(null); // Clear the selected tool to remove
         } catch (error) {
@@ -54,9 +57,29 @@ const Tools = () => {
         }
     };
 
+    const handleEditTool = async () => {
+        try {
+            const { id, ...updatedTool } = toolToEdit;
+            const response = await axios.put(`${config.apiURL}/tools/${id}`, updatedTool);
+            setTools(tools.map(tool => tool._id === id ? response.data : tool));
+            setShowEditPopup(false);
+            setToolToEdit({ id: null, name: '', status: '', rfid: '', slot: '' }); // Clear the edit tool state
+        } catch (error) {
+            console.error('Error editing tool:', error);
+        }
+    };
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setNewTool(prevState => ({
+            ...prevState,
+            [name]: value
+        }));
+    };
+
+    const handleEditChange = (e) => {
+        const { name, value } = e.target;
+        setToolToEdit(prevState => ({
             ...prevState,
             [name]: value
         }));
@@ -69,26 +92,29 @@ const Tools = () => {
                 <div className="flex justify-center w-full">
                     <button
                         onClick={() => setShowAddPopup(true)}
-                        className="font-custom flex-grow bg-gray-700 hover:bg-gray-900 text-white py-2 px-7 rounded mx-1"
-                    >
+                        className="font-custom flex-grow bg-gray-700 hover:bg-gray-900 text-white py-2 px-7 rounded mx-1">
                         Add Tool
                     </button>
                 </div>
             </div>
             <div className="grid grid-cols-1 gap-4">
                 {tools.map(tool => (
-                    <div key={tool.id} className={`rounded-lg ${tool.status === '1' ? 'bg-green-500' : 'bg-red-500'} p-4 text-white flex justify-between items-center font-custom`}>
+                    <div key={tool._id} className={`rounded-lg ${tool.status === '1' ? 'bg-green-500' : 'bg-red-500'} p-4 text-white flex justify-between items-center font-custom`}>
                         <span>{tool.name}</span>
-                        <button className="font-custom bg-gray-700 hover:bg-gray-900 text-white text-sm py-2 px-1 rounded">
+                        <button 
+                            onClick={() => {
+                                setToolToEdit({ id: tool._id, name: tool.name, status: tool.status, rfid: tool.rfid, slot: tool.slot });
+                                setShowEditPopup(true);
+                            }}
+                            className="font-custom bg-gray-700 hover:bg-gray-900 text-white text-sm py-2 px-1 rounded">
                             Edit
                         </button>
                         <button
                             onClick={() => {
-                                setToolToRemove(tool.id);
+                                setToolToRemove(tool._id);
                                 setShowRemovePopup(true);
                             }}
-                            className="font-custom bg-gray-700 hover:bg-gray-900 text-white text-sm py-2 px-1 rounded"
-                        >
+                            className="font-custom bg-gray-700 hover:bg-gray-900 text-white text-sm py-2 px-1 rounded">
                             Remove
                         </button>
                     </div>
@@ -105,14 +131,12 @@ const Tools = () => {
                         <div className="flex justify-end">
                             <button
                                 onClick={() => setShowAddPopup(false)}
-                                className="font-custom bg-gray-700 hover:bg-gray-900 text-white font-bold py-2 px-4 rounded mr-4"
-                            >
+                                className="font-custom bg-gray-700 hover:bg-gray-900 text-white font-bold py-2 px-4 rounded mr-4">
                                 Cancel
                             </button>
                             <button
                                 onClick={handleAddTool}
-                                className="font-custom bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-                            >
+                                className="font-custom bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
                                 Add
                             </button>
                         </div>
@@ -126,15 +150,36 @@ const Tools = () => {
                         <div className="flex justify-end">
                             <button
                                 onClick={() => setShowRemovePopup(false)}
-                                className="font-custom bg-gray-700 hover:bg-gray-900 text-white font-bold py-2 px-4 rounded mr-4"
-                            >
+                                className="font-custom bg-gray-700 hover:bg-gray-900 text-white font-bold py-2 px-4 rounded mr-4">
                                 No
                             </button>
                             <button
                                 onClick={handleRemoveTool}
-                                className="font-custom bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-                            >
+                                className="font-custom bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
                                 Yes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {showEditPopup && (
+                <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-black bg-opacity-50">
+                    <div className="bg-white p-6 rounded-lg w-1/3">
+                        <h3 className="text-lg font-bold mb-4">Edit Tool</h3>
+                        <input type="text" name="name" value={toolToEdit.name} onChange={handleEditChange} placeholder="Enter tool name" className="border border-gray-300 rounded-md p-2 mb-4 w-full"/>
+                        <input type="text" name="status" value={toolToEdit.status} onChange={handleEditChange} placeholder="Enter tool status" className="border border-gray-300 rounded-md p-2 mb-4 w-full"/>
+                        <input type="text" name="rfid" value={toolToEdit.rfid} onChange={handleEditChange} placeholder="Enter tool RFID" className="border border-gray-300 rounded-md p-2 mb-4 w-full"/>
+                        <input type="text" name="slot" value={toolToEdit.slot} onChange={handleEditChange} placeholder="Enter tool slot" className="border border-gray-300 rounded-md p-2 mb-4 w-full"/>
+                        <div className="flex justify-end">
+                            <button
+                                onClick={() => setShowEditPopup(false)}
+                                className="font-custom bg-gray-700 hover:bg-gray-900 text-white font-bold py-2 px-4 rounded mr-4">
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleEditTool}
+                                className="font-custom bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                                Save Changes
                             </button>
                         </div>
                     </div>
