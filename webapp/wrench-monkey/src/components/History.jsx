@@ -5,37 +5,21 @@ import config from '../config';
 
 const History = () => {
     const [history, setHistory] = useState([]);
-    const [tools, setTools] = useState({});
-    const [users, setUsers] = useState({});
     const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
         const fetchHistory = async () => {
             try {
                 const historyResponse = await axios.get(`${config.apiURL}/history`);
-                const toolsResponse = await axios.get(`${config.apiURL}/tools`);
-                const usersResponse = await axios.get(`${config.apiURL}/users`);
-
-                const toolsMap = toolsResponse.data.reduce((map, tool) => {
-                    map[tool._id] = tool.name;
-                    return map;
-                }, {});
-
-                const usersMap = usersResponse.data.reduce((map, user) => {
-                    map[user._id] = user.name;
-                    return map;
-                }, {});
 
                 const formattedHistory = historyResponse.data.map(item => ({
                     ...item,
-                    toolName: toolsMap[item.toolId] || 'Unknown Tool',
-                    userName: usersMap[item.userId] || 'Unknown User',
+                    toolName: item.toolId.name || 'Unknown Tool',
+                    userName: item.userId.name || 'Unknown User',
                     checkOut: new Date(item.checkOut).toLocaleString(),
                     checkIn: new Date(item.checkIn).toLocaleString()
                 }));
 
-                setTools(toolsMap);
-                setUsers(usersMap);
                 setHistory(formattedHistory);
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -50,8 +34,8 @@ const History = () => {
     };
 
     const filteredHistory = history.filter(historyItem =>
-        historyItem.toolName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        historyItem.userName.toLowerCase().includes(searchTerm.toLowerCase())
+        (historyItem.toolName || 'Unknown Tool').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (historyItem.userName || 'Unknown User').toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
