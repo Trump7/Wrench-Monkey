@@ -16,8 +16,11 @@ router.post('/register', async (req, res) => {
           return res.status(400).send('Email already in use');
       }
 
+      const userCount = await User.countDocuments();
+      const isAdmin = userCount === 0;
+
       const hashedPassword = await bcrypt.hash(pass, 10);
-      const newUser = new User({ name, email, pass: hashedPassword });
+      const newUser = new User({ name, email, pass: hashedPassword, admin: isAdmin });
       await newUser.save();
       res.status(201).send('User registered');
     } catch (err) {
@@ -36,7 +39,7 @@ router.post('/login', async (req, res) => {
     const isMatch = await bcrypt.compare(pass, user.pass);
     if (!isMatch) return res.status(400).send('Invalid credentials');
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ id: user._id, admin: user.admin }, process.env.JWT_SECRET, { expiresIn: '1h' });
     res.json({ token, userId: user._id });
   } catch (err) {
     res.status(500).send('Error logging in user');

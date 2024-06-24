@@ -3,7 +3,7 @@ import axios from 'axios';
 import '../index.css';
 import config from '../config';
 
-const Tools = () => {
+const Tools = ({admin}) => {
     const [tools, setTools] = useState([]);
     const [showAddPopup, setShowAddPopup] = useState(false);
     const [showRemovePopup, setShowRemovePopup] = useState(false);
@@ -88,35 +88,47 @@ const Tools = () => {
     return (
         <div>
             <h2 className="bg-gray-700 p-4 rounded-lg mb-4 text-white font-custom font-bold text-center text-2xl">Tools</h2>
-            <div className="flex justify-center mb-6">
-                <div className="flex justify-center w-full">
-                    <button
-                        onClick={() => setShowAddPopup(true)}
-                        className="font-custom flex-grow bg-gray-700 hover:bg-gray-900 text-white py-2 px-7 rounded mx-1">
-                        Add Tool
-                    </button>
+            {admin && (
+                <div className="flex justify-center mb-6">
+                    <div className="flex justify-center w-full">
+                        <button
+                            onClick={() => setShowAddPopup(true)}
+                            className="font-custom flex-grow bg-gray-700 hover:bg-gray-900 text-white py-2 px-7 rounded mx-1">
+                            Add Tool
+                        </button>
+                    </div>
                 </div>
-            </div>
+            )}
             <div className="grid grid-cols-1 gap-4">
                 {tools.map(tool => (
                     <div key={tool._id} className={`rounded-lg ${tool.status === '1' ? 'bg-green-500' : 'bg-red-500'} p-4 text-white flex justify-between items-center font-custom`}>
                         <span>{tool.name}</span>
-                        <button 
-                            onClick={() => {
-                                setToolToEdit({ id: tool._id, name: tool.name, status: tool.status, rfid: tool.rfid, slot: tool.slot });
-                                setShowEditPopup(true);
-                            }}
-                            className="font-custom bg-gray-700 hover:bg-gray-900 text-white text-sm py-2 px-1 rounded">
-                            Edit
-                        </button>
-                        <button
-                            onClick={() => {
-                                setToolToRemove(tool._id);
-                                setShowRemovePopup(true);
-                            }}
-                            className="font-custom bg-gray-700 hover:bg-gray-900 text-white text-sm py-2 px-1 rounded">
-                            Remove
-                        </button>
+                        {admin ? (
+                            <>
+                                <button 
+                                    onClick={() => {
+                                        setToolToEdit({ id: tool._id, name: tool.name, status: tool.status, rfid: tool.rfid, slot: tool.slot });
+                                        setShowEditPopup(true);
+                                    }}
+                                    className="font-custom bg-gray-700 hover:bg-gray-900 text-white text-sm py-2 px-1 rounded">
+                                    Edit
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setToolToRemove(tool._id);
+                                        setShowRemovePopup(true);
+                                    }}
+                                    className="font-custom bg-gray-700 hover:bg-gray-900 text-white text-sm py-2 px-1 rounded">
+                                    Remove
+                                </button>
+                            </>
+                        ) : (
+                            <button
+                                onClick={() => handleCheckout(tool._id)}
+                                className="font-custom bg-blue-500 hover:bg-blue-700 text-white text-sm py-2 px-1 rounded">
+                                Check Out
+                            </button>
+                        )}
                     </div>
                 ))}
             </div>

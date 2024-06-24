@@ -16,3 +16,17 @@ export const isAuthenticated = () => {
         return false;
     }
 };
+
+export const getUserRole = () => {
+    const token = Cookies.get('token');
+    if (!token) return null;
+
+    try {
+        const decoded = jwtDecode(token);
+        console.log(decoded.admin);
+        return decoded.admin ? 'admin' : 'user';
+    } catch (error) {
+        console.error("Error decoding token:", error);
+        return null;
+    }
+};
