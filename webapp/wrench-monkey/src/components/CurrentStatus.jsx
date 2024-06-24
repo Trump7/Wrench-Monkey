@@ -7,19 +7,34 @@ import robot from '../assets/logo.jpg';
 const CurrentStatus = () => {
     const [status, setStatus] = useState(null);
 
-    const fetchStatus = async () => {
+    // Function to fetch initial status
+    const fetchInitialStatus = async () => {
         try {
             const response = await axios.get(`${config.apiURL}/status`);
             setStatus(response.data);
         } catch (error) {
-            console.error('Error fetching status:', error);
+            console.error('Error fetching initial status:', error);
         }
     };
 
     useEffect(() => {
-        fetchStatus();
-        const interval = setInterval(fetchStatus, 5000); // Fetch status every 5 seconds
-        return () => clearInterval(interval); // Clean up interval on unmount
+        fetchInitialStatus(); // Fetch initial status
+
+        const eventSource = new EventSource(`${config.apiURL}/status/stream`);
+
+        eventSource.onmessage = (event) => {
+            const newStatus = JSON.parse(event.data);
+            console.log('Received status:', newStatus);
+            setStatus(newStatus);
+        };
+
+        eventSource.onerror = (error) => {
+            console.error('EventSource error:', error);
+        };
+
+        return () => {
+            eventSource.close();
+        };
     }, []);
 
     if (!status) {
