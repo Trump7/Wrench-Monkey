@@ -3,6 +3,7 @@ import axios from 'axios';
 import '../index.css';
 import config from '../config';
 import robot from '../assets/logo.jpg';
+import { eventSourceManager } from '../utilities/eventSource';
 
 const CurrentStatus = () => {
     const [status, setStatus] = useState(null);
@@ -20,20 +21,10 @@ const CurrentStatus = () => {
     useEffect(() => {
         fetchInitialStatus(); // Fetch initial status
 
-        const eventSource = new EventSource(`${config.apiURL}/status/stream`);
-
-        eventSource.onmessage = (event) => {
-            const newStatus = JSON.parse(event.data);
-            console.log('Received status:', newStatus);
-            setStatus(newStatus);
-        };
-
-        eventSource.onerror = (error) => {
-            console.error('EventSource error:', error);
-        };
+        const cleanupEventSource = eventSourceManager(setStatus, () => {}, () => {}); // Only setStatus handler
 
         return () => {
-            eventSource.close();
+            cleanupEventSource();
         };
     }, []);
 

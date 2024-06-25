@@ -1,25 +1,29 @@
+// History.jsx (components)
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import '../index.css';
 import config from '../config';
+import { eventSourceManager } from '../utilities/eventSource';
 
 const History = () => {
     const [history, setHistory] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
 
+    const formatHistory = (historyData) => {
+        return historyData.map(item => ({
+            ...item,
+            toolName: item.toolId.name || 'Unknown Tool',
+            userName: item.userId.name || 'Unknown User',
+            checkOut: item.checkOut ? new Date(item.checkOut).toLocaleString() : 'N/A',
+            checkIn: item.checkIn ? new Date(item.checkIn).toLocaleString() : 'N/A'
+        })).sort((a, b) => new Date(b.checkOut) - new Date(a.checkOut));
+    };
+
     useEffect(() => {
         const fetchHistory = async () => {
             try {
                 const historyResponse = await axios.get(`${config.apiURL}/history`);
-
-                const formattedHistory = historyResponse.data.map(item => ({
-                    ...item,
-                    toolName: item.toolId.name || 'Unknown Tool',
-                    userName: item.userId.name || 'Unknown User',
-                    checkOut: new Date(item.checkOut).toLocaleString(),
-                    checkIn: new Date(item.checkIn).toLocaleString()
-                }));
-
+                const formattedHistory = formatHistory(historyResponse.data);
                 setHistory(formattedHistory);
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -27,6 +31,14 @@ const History = () => {
         };
 
         fetchHistory();
+
+        const cleanupEventSource = eventSourceManager(() => {}, () => {}, (data) => {
+            setHistory(formatHistory(data));
+        });
+
+        return () => {
+            cleanupEventSource();
+        };
     }, []);
 
     const handleSearchChange = (e) => {

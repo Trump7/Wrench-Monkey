@@ -3,12 +3,12 @@ const Status = require('../models/Status');
 const Tool = require('../models/Tool');
 const User = require('../models/User');
 const router = express.Router();
-const { broadcastStatus } = require('../sse');
+const { broadcastEvent } = require('../sse');
 
 // Helper function to broadcast the updated status
 const updateAndBroadcast = async (update) => {
   const status = await Status.findOneAndUpdate({}, update, { new: true, upsert: true });
-  broadcastStatus(status);
+  broadcastEvent(status, 'status');
   return status;
 };
 
@@ -114,7 +114,7 @@ router.post('/updateToolStatus', async (req, res) => {
     status.toolsStatus[toolIndex] = { ...status.toolsStatus[toolIndex], ...toolStatus };
     await status.save();
 
-    broadcastStatus(status);
+    broadcastEvent(status, 'status');
     res.status(200).json(status);
   } catch (err) {
     console.error('Error updating tool status:', err);

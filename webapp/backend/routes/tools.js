@@ -1,5 +1,7 @@
 const express = require('express');
 const Tool = require('../models/Tool');
+const History = require('../models/History');
+const { broadcastEvent } = require('../sse');
 
 const router = express.Router();
 
@@ -9,6 +11,10 @@ router.post('/', async (req, res) => {
     try {
         const newTool = new Tool({ name, status, rfid, slot });
         const savedTool = await newTool.save();
+        
+        const tools = await Tool.find();
+        broadcastEvent(tools, 'tools');
+
         res.status(201).json(savedTool);
     } catch (err) {
         res.status(400).json({ message: err.message });
@@ -46,6 +52,10 @@ router.put('/:id', async (req, res) => {
             { new: true }
         );
         if (!updatedTool) return res.status(404).json({ message: 'Tool not found' });
+        
+        const tools = await Tool.find();
+        broadcastEvent(tools, 'tools');
+
         res.status(200).json(updatedTool);
     } catch (err) {
         res.status(400).json({ message: err.message });
@@ -57,9 +67,79 @@ router.delete('/:id', async (req, res) => {
     try {
         const deletedTool = await Tool.findByIdAndDelete(req.params.id);
         if (!deletedTool) return res.status(404).json({ message: 'Tool not found' });
+        
+        const tools = await Tool.find();
+        broadcastEvent(tools, 'tools');
+        
         res.status(200).json({ message: 'Tool deleted' });
     } catch (err) {
         res.status(500).json({ message: err.message });
+    }
+});
+
+
+router.post('/checkout', async (req, res) => {
+    try {
+        const { toolId, userId, timestamp } = req.body;
+        const tool = await Tool.findById(toolId);
+
+        if (!tool) {
+            return res.status(404).json({ message: 'Tool not found' });
+        }
+
+        if (tool.status !== '1') {
+            return res.status(400).json({ message: 'Tool is not available for checkout' });
+        }
+
+        tool.status = '0';
+        await tool.save();
+
+        const history = new History({
+            toolId,
+            userId,
+            checkOut: timestamp
+        });
+        await history.save();
+
+        const tools = await Tool.find();
+        const histories = await History.find().populate('toolId').populate('userId');
+
+        broadcastEvent(tools, 'tools');
+        broadcastEvent(histories, 'history');
+
+        res.status(200).json({ message: 'Tool checked out successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error checking out tool' });
+    }
+});
+
+router.post('/checkin', async (req, res) => {
+    try {
+        const { toolId, userId, timestamp } = req.body;
+        const tool = await Tool.findById(toolId);
+
+        if (!tool) {
+            return res.status(404).json({ message: 'Tool not found' });
+        }
+
+        tool.status = '1';
+        await tool.save();
+
+        const history = await History.findOneAndUpdate(
+            { toolId, userId, checkIn: null },
+            { checkIn: timestamp },
+            { new: true }
+        );
+
+        const tools = await Tool.find();
+        const histories = await History.find().populate('toolId').populate('userId');
+
+        broadcastEvent(tools, 'tools');
+        broadcastEvent(histories, 'history');
+
+        res.status(200).json({ message: 'Tool checked in successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error checking in tool' });
     }
 });
 
