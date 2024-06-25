@@ -73,11 +73,15 @@ router.post('/updateConnection', async (req, res) => {
   }
 });
 
-// Update Current Station
+// Update Current Station and Travel Status
 router.post('/updateStation', async (req, res) => {
   try {
-    const { currentStation } = req.body;
-    const status = await updateAndBroadcast({ currentStation });
+    const { currentStation, isTraveling, destinationStation } = req.body;
+    const status = await updateAndBroadcast({
+      currentStation,
+      isTraveling,
+      destinationStation
+    });
     res.status(200).json(status);
   } catch (err) {
     console.error('Error updating station:', err);
@@ -85,11 +89,14 @@ router.post('/updateStation', async (req, res) => {
   }
 });
 
-// Update Traveling Status
+// Emergency Stop
 router.post('/updateTraveling', async (req, res) => {
   try {
-    const { isTraveling, destinationStation } = req.body;
-    const status = await updateAndBroadcast({ isTraveling, destinationStation });
+    const status = await updateAndBroadcast({
+      isTraveling: false,
+      destinationStation: null,
+      currentStation: 'Unknown',
+    });
     res.status(200).json(status);
   } catch (err) {
     console.error('Error updating traveling status:', err);
