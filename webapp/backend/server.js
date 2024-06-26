@@ -1,6 +1,3 @@
-const config = require('./config');
-const axios = require('axios');
-
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -11,6 +8,7 @@ const statusRoutes = require('./routes/status');
 const historyRoutes = require('./routes/history');
 const { addClient, removeClient, broadcastEvent } = require('./sse');
 const WebSocket = require('ws');
+const axios = require('axios');
 require('dotenv').config();
 
 const Tool = require('./models/Tool');
@@ -80,30 +78,54 @@ const initializeTools = async () => {
 initializeStatus();
 initializeTools();
 
-const wss = new WebSocket.Server({ server })
+const wss = new WebSocket.Server({ server });
 
 wss.on('connection', (ws) => {
   console.log('Robot connected via WebSocket');
 
   // Update connection status to true
-  axios.post(`${config.apiURL}/status/updateConnection`, { isConnected: true })
+  axios.post(`${process.env.API_URL}/status/updateConnection`, { isConnected: true })
     .then(() => console.log('Updated connection status to true'))
     .catch(err => console.error('Error updating connection status:', err));
 
   ws.on('message', (message) => {
-    console.log('Recieved message from robot:', message);
+    const decodedMessage = Buffer.from(message).toString('utf-8');
+    console.log('Received message from robot:', decodedMessage);
+    // Handle the decoded message as needed
   });
 
-  ws.on('close', () => {
-    console.log('Robot Disconnected');
-
-    // Update connection status to false
-    axios.post(`${config.apiURL}/status/updateConnection`, { isConnected: false })
-      .then(() => console.log('Updated connection status to false'))
-      .catch(err => console.error('Error updating connection status:', err));
+  ws.on('pong', () => {
+    console.log('Received pong from robot');
+    ws.isAlive = true;
   });
 
+  ws.isAlive = true;
   ws.robot = true;
+});
+
+const pingInterval = setInterval(() => {
+  wss.clients.forEach((ws) => {
+    if (!ws.isAlive && ws.robot) {
+      console.log('Robot connection lost');
+      return ws.terminate();
+    }
+
+    ws.isAlive = false;
+    ws.ping();
+  });
+}, 30000);
+
+wss.on('close', () => {
+  clearInterval(pingInterval);
+});
+
+wss.on('close', (ws) => {
+  console.log('Robot Disconnected');
+
+  // Update connection status to false
+  axios.post(`${process.env.API_URL}/status/updateConnection`, { isConnected: false })
+    .then(() => console.log('Updated connection status to false'))
+    .catch(err => console.error('Error updating connection status:', err));
 });
 
 // Function to send commands to the robot
