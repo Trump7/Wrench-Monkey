@@ -2,7 +2,7 @@ const express = require('express');
 const Tool = require('../models/Tool');
 const History = require('../models/History');
 const { broadcastEvent } = require('../sse');
-const { sendCommandToRobot } = require('../server');
+const { sendCommandToRobot } = require('../websocket');
 
 const router = express.Router();
 
@@ -110,13 +110,7 @@ router.post('/checkout', async (req, res) => {
         broadcastEvent(histories, 'history');
 
         //send command to robot
-        try {
-            console.log('Sending command to robot:', {type: 'toolRequested', toolNumber: tool.slot });
-            sendCommandToRobot({type: 'toolRequested', toolNumber: tool.slot });
-            console.log('Command sent successfully');
-        } catch (err) {
-            console.error('Error sending command to robot:', err);
-        }
+        sendCommandToRobot({type: 'toolRequested', toolNumber: tool.slot });
 
         res.status(200).json({ message: 'Tool checked out successfully' });
     } catch (error) {

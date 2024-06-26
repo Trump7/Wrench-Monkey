@@ -8,8 +8,7 @@ const userRoutes = require('./routes/users');
 const statusRoutes = require('./routes/status');
 const historyRoutes = require('./routes/history');
 const { addClient, removeClient, broadcastEvent } = require('./sse');
-const WebSocket = require('ws');
-const axios = require('axios');
+const { setupWebSocketServer } = require('./websocket'); // Import the WebSocket setup function
 require('dotenv').config();
 
 const Tool = require('./models/Tool');
@@ -49,6 +48,9 @@ app.get('/api/stream', (req, res) => {
 
 const server = app.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));
 
+// Setup WebSocket server
+setupWebSocketServer(server);
+
 const initializeStatus = async () => {
   try {
     const status = await Status.findOne();
@@ -65,10 +67,10 @@ const initializeStatus = async () => {
 const initializeTools = async () => {
   try {
     const tools = await Tool.find();
-    if(tools){
+    if (tools) {
       broadcastEvent(tools, 'tools');
-    } else{
-      console.log('No initial tools found in the database.')
+    } else {
+      console.log('No initial tools found in the database.');
     }
   } catch (error) {
     console.error('Error initializing tools:', error);
@@ -78,58 +80,3 @@ const initializeTools = async () => {
 // Call the function to initialize status and tools
 initializeStatus();
 initializeTools();
-
-const wss = new WebSocket.Server({ server });
-
-wss.on('connection', (ws) => {
-  console.log('Robot connected via WebSocket');
-
-  // Update connection status to true
-  axios.post(`${config.apiURL}/status/updateConnection`, { isConnected: true })
-    .then(() => console.log('Updated connection status to true'))
-    .catch(err => console.error('Error updating connection status:', err));
-
-  ws.on('message', (message) => {
-    const decodedMessage = Buffer.from(message).toString('utf-8');
-    console.log('Received message from robot:', decodedMessage);
-  });
-
-  ws.on('pong', () => {
-    console.log('Received pong from robot');
-    ws.isAlive = true;
-  });
-
-  ws.isAlive = true;
-  ws.robot = true;
-});
-
-const pingInterval = setInterval(() => {
-  wss.clients.forEach((ws) => {
-    if (!ws.isAlive && ws.robot) {
-      console.log('Robot connection lost');
-      // Update connection status to false
-      axios.post(`${config.apiURL}/status/updateConnection`, { isConnected: false })
-      .then(() => console.log('Updated connection status to false'))
-      .catch(err => console.error('Error updating connection status:', err));
-      return ws.terminate();
-    }
-
-    ws.isAlive = false;
-    ws.ping();
-  });
-}, 10000);
-
-wss.on('close', () => {
-  clearInterval(pingInterval);
-});
-
-// Function to send commands to the robot
-const sendCommandToRobot = (command) => {
-  wss.clients.forEach(client => {
-    if (client.readyState === WebSocket.OPEN && client.robot) {
-      client.send(JSON.stringify(command));
-    }
-  });
-};
-
-module.exports = { sendCommandToRobot };
