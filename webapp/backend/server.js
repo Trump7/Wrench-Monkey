@@ -1,3 +1,4 @@
+import config from "../wrench-monkey/src/config";
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
