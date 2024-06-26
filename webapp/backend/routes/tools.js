@@ -2,6 +2,7 @@ const express = require('express');
 const Tool = require('../models/Tool');
 const History = require('../models/History');
 const { broadcastEvent } = require('../sse');
+const { sendCommandToRobot } = require('../server');
 
 const router = express.Router();
 
@@ -106,6 +107,9 @@ router.post('/checkout', async (req, res) => {
 
         broadcastEvent(tools, 'tools');
         broadcastEvent(histories, 'history');
+
+        //send command to robot
+        sendCommandToRobot({type: 'toolRequested', toolNumber: tool.slot });
 
         res.status(200).json({ message: 'Tool checked out successfully' });
     } catch (error) {
