@@ -106,16 +106,25 @@ router.post('/checkout', async (req, res) => {
         const histories = await History.find().populate('toolId').populate('userId');
 
         broadcastEvent(tools, 'tools');
+        console.log("\n");
         broadcastEvent(histories, 'history');
 
         //send command to robot
-        sendCommandToRobot({type: 'toolRequested', toolNumber: tool.slot });
+        try {
+            console.log('Sending command to robot:', {type: 'toolRequested', toolNumber: tool.slot });
+            sendCommandToRobot({type: 'toolRequested', toolNumber: tool.slot });
+            console.log('Command sent successfully');
+        } catch (err) {
+            console.error('Error sending command to robot:', err);
+        }
 
         res.status(200).json({ message: 'Tool checked out successfully' });
     } catch (error) {
+        console.error('Error in checkout route:', error);
         res.status(500).json({ message: 'Error checking out tool' });
     }
 });
+
 
 router.post('/checkin', async (req, res) => {
     try {
