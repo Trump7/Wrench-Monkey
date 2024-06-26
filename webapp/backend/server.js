@@ -1,4 +1,5 @@
 const express = require('express');
+const config = require('./config');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const authRoutes = require('./routes/auth');
@@ -84,14 +85,13 @@ wss.on('connection', (ws) => {
   console.log('Robot connected via WebSocket');
 
   // Update connection status to true
-  axios.post(`${process.env.API_URL}/status/updateConnection`, { isConnected: true })
+  axios.post(`${config.apiURL}/status/updateConnection`, { isConnected: true })
     .then(() => console.log('Updated connection status to true'))
     .catch(err => console.error('Error updating connection status:', err));
 
   ws.on('message', (message) => {
     const decodedMessage = Buffer.from(message).toString('utf-8');
     console.log('Received message from robot:', decodedMessage);
-    // Handle the decoded message as needed
   });
 
   ws.on('pong', () => {
@@ -107,6 +107,10 @@ const pingInterval = setInterval(() => {
   wss.clients.forEach((ws) => {
     if (!ws.isAlive && ws.robot) {
       console.log('Robot connection lost');
+      // Update connection status to false
+      axios.post(`${config.apiURL}/status/updateConnection`, { isConnected: false })
+      .then(() => console.log('Updated connection status to false'))
+      .catch(err => console.error('Error updating connection status:', err));
       return ws.terminate();
     }
 
@@ -117,15 +121,6 @@ const pingInterval = setInterval(() => {
 
 wss.on('close', () => {
   clearInterval(pingInterval);
-});
-
-wss.on('close', (ws) => {
-  console.log('Robot Disconnected');
-
-  // Update connection status to false
-  axios.post(`${process.env.API_URL}/status/updateConnection`, { isConnected: false })
-    .then(() => console.log('Updated connection status to false'))
-    .catch(err => console.error('Error updating connection status:', err));
 });
 
 // Function to send commands to the robot
