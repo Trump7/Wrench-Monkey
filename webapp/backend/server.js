@@ -7,6 +7,7 @@ const userRoutes = require('./routes/users');
 const statusRoutes = require('./routes/status');
 const historyRoutes = require('./routes/history');
 const { addClient, removeClient, broadcastEvent } = require('./sse');
+const WebSocket = require('ws');
 require('dotenv').config();
 
 const Tool = require('./models/Tool');
@@ -44,7 +45,7 @@ app.get('/api/stream', (req, res) => {
   });
 });
 
-app.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));
+const server = app.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));
 
 const initializeStatus = async () => {
   try {
@@ -75,3 +76,40 @@ const initializeTools = async () => {
 // Call the function to initialize status and tools
 initializeStatus();
 initializeTools();
+
+const wss = new WebSocket.Server({ server })
+
+wss.on('connection', (ws) => {
+  console.log('Robot connected via WebSocket');
+
+  // Update connection status to true
+  axios.post(`${config.apiURL}/status/updateConnection`, { isConnected: true })
+    .then(() => console.log('Updated connection status to true'))
+    .catch(err => console.error('Error updating connection status:', err));
+
+  ws.on('message', (message) => {
+    console.log('Recieved message from robot:', message);
+  });
+
+  ws.on('close', () => {
+    console.log('Robot Disconnected');
+
+    // Update connection status to false
+    axios.post(`${config.apiURL}/status/updateConnection`, { isConnected: false })
+      .then(() => console.log('Updated connection status to false'))
+      .catch(err => console.error('Error updating connection status:', err));
+  });
+
+  ws.robot = true;
+});
+
+// Function to send commands to the robot
+const sendCommandToRobot = (command) => {
+  wss.clients.forEach(client => {
+    if (client.readyState === WebSocket.OPEN && client.robot) {
+      client.send(JSON.stringify(command));
+    }
+  });
+};
+
+module.exports = { sendCommandToRobot };
