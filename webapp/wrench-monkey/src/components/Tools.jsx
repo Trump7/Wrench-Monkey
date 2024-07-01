@@ -14,6 +14,8 @@ const Tools = ({ admin }) => {
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [showCheckoutPopup, setShowCheckoutPopup] = useState(false);
   const [checkoutTool, setCheckoutTool] = useState(null);
+  const [showCheckinPopup, setShowCheckinPopup] = useState(false);
+  const [checkinTool, setCheckinTool] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [newTool, setNewTool] = useState({
     name: '',
@@ -139,6 +141,36 @@ const Tools = ({ admin }) => {
     }
   };
 
+// lets do check in!
+  const handleCheckin = async (toolId) => {
+    const tool = tools.find(t => t._id === toolId);
+    if (tool.status !== '0') {
+      setErrorMessage('Tool is not available for checkout.');
+      setShowErrorPopup(true);
+      return;
+    }
+    setCheckinTool(tool);
+    setShowCheckinPopup(true);
+  };
+
+  const confirmCheckin = async () => {
+    try {
+      const userId = getUserId();
+      await axios.post(`${config.apiURL}/tools/checkin`, {
+        toolId: checkinTool._id,
+        userId,
+        timestamp: new Date().toISOString()
+      });
+
+      setShowCheckinPopup(false);
+      setCheckinTool(null);
+    } catch (error) {
+      console.error(error);
+      setErrorMessage('Error checking out tool.');
+      setShowErrorPopup(true);
+    }
+  };
+
   const availableSlots = [1, 2, 3, 4];
 
   return (
@@ -179,11 +211,19 @@ const Tools = ({ admin }) => {
                 </button>
               </>
             ) : (
+              tool.status === '1' ? (
               <button
                 onClick={() => handleCheckout(tool._id)}
                 className="font-custom bg-blue-500 hover:bg-blue-700 text-white text-sm py-2 px-1 rounded">
                 Check Out
               </button>
+              ) : (
+              <button
+                onClick={() => handleCheckin(tool._id)}
+                className="font-custom bg-blue-500 hover:bg-blue-700 text-white text-sm py-2 px-1 rounded">
+                Check In
+              </button>
+              )
             )}
           </div>
         ))}
@@ -201,6 +241,26 @@ const Tools = ({ admin }) => {
               </button>
               <button
                 onClick={confirmCheckout}
+                className="font-custom bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                Yes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showCheckinPopup && (
+        <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg w-1/3">
+            <h3 className="text-lg font-custom font-bold mb-4">Confirm Checkin</h3>
+            <p className="font-custom mb-4">Are you sure you want to check in this tool?</p>
+            <div className="flex justify-end">
+              <button
+                onClick={() => setShowCheckinPopup(false)}
+                className="font-custom bg-gray-700 hover:bg-gray-900 text-white font-bold py-2 px-4 rounded mr-4">
+                No
+              </button>
+              <button
+                onClick={confirmCheckin}
                 className="font-custom bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
                 Yes
               </button>

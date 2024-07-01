@@ -129,6 +129,10 @@ router.post('/checkin', async (req, res) => {
             return res.status(404).json({ message: 'Tool not found' });
         }
 
+        if (tool.status !== '0') {
+            return res.status(400).json({ message: 'Tool is currently checked in' });
+        }
+
         tool.status = '1';
         await tool.save();
 
@@ -142,7 +146,11 @@ router.post('/checkin', async (req, res) => {
         const histories = await History.find().populate('toolId').populate('userId');
 
         broadcastEvent(tools, 'tools');
+        console.log("\n");
         broadcastEvent(histories, 'history');
+
+        //send command to robot
+        sendCommandToRobot({type: 'toolReturned', toolNumber: tool.slot });
 
         res.status(200).json({ message: 'Tool checked in successfully' });
     } catch (error) {
