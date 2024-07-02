@@ -4,6 +4,8 @@ const Tool = require('../models/Tool');
 const User = require('../models/User');
 const router = express.Router();
 const { broadcastEvent } = require('../sse');
+const { sendCommandToRobot } = require('../websocket');
+
 
 // Helper function to broadcast the updated status
 const updateAndBroadcast = async (update) => {
