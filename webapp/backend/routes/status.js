@@ -82,6 +82,9 @@ router.post('/updateStation', async (req, res) => {
       isTraveling,
       destinationStation
     });
+
+    sendCommandToRobot({type: 'robotTravel', stationID: status.destinationStation });
+
     res.status(200).json(status);
   } catch (err) {
     console.error('Error updating station:', err);
