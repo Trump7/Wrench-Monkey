@@ -118,6 +118,9 @@ router.post('/updateTraveling', async (req, res) => {
       destinationStation: null,
       currentStation: 'Unknown',
     });
+
+    sendCommandToRobot({type: 'stopTravel'});
+
     res.status(200).json(status);
   } catch (err) {
     console.error('Error updating traveling status:', err);
