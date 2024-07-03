@@ -153,4 +153,24 @@ router.post('/updateToolStatus', async (req, res) => {
   }
 });
 
+// Check Traveling Status
+router.get('/travelingStatus', async (req, res) => {
+  try {
+    const status = await Status.findOne();
+    if (!status) {
+      return res.status(404).json({ message: 'Status not found' });
+    }
+
+    const travelingStatus = {
+      isTraveling: status.isTraveling
+    };
+
+    res.status(200).json(travelingStatus);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
 module.exports = router;
