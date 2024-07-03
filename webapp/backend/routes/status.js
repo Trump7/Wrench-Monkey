@@ -75,7 +75,7 @@ router.post('/updateConnection', async (req, res) => {
   }
 });
 
-// Update Current Station and Travel Status
+// Update Current Station and Travel Status for robot
 router.post('/updateStation', async (req, res) => {
   try {
     const { currentStation, isTraveling, destinationStation } = req.body;
@@ -87,6 +87,22 @@ router.post('/updateStation', async (req, res) => {
 
     sendCommandToRobot({type: 'robotTravel', stationID: status.destinationStation });
 
+    res.status(200).json(status);
+  } catch (err) {
+    console.error('Error updating station:', err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Update robot status after travel
+router.post('/updateFinalStation', async (req, res) => {
+  try {
+    const { currentStation, isTraveling, destinationStation } = req.body;
+    const status = await updateAndBroadcast({
+      currentStation,
+      isTraveling,
+      destinationStation
+    });
     res.status(200).json(status);
   } catch (err) {
     console.error('Error updating station:', err);
