@@ -63,6 +63,27 @@ router.put('/:id', async (req, res) => {
     }
 });
 
+// Update tool status by slot number
+router.put('/statusBySlot/:slot', async (req, res) => {
+    const { status } = req.body;
+    try {
+        const updatedTool = await Tool.findOneAndUpdate(
+            { slot: req.params.slot },
+            { status },
+            { new: true }
+        );
+        if (!updatedTool) return res.status(404).json({ message: 'Tool not found' });
+        
+        const tools = await Tool.find();
+        broadcastEvent(tools, 'tools');
+
+        res.status(200).json(updatedTool);
+    } catch (err) {
+        res.status(400).json({ message: err.message });
+    }
+});
+
+
 // Delete a tool by ID
 router.delete('/:id', async (req, res) => {
     try {
@@ -92,8 +113,8 @@ router.post('/checkout', async (req, res) => {
             return res.status(400).json({ message: 'Tool is not available for checkout' });
         }
 
-        tool.status = '0';
-        await tool.save();
+        // tool.status = '0';
+        // await tool.save();
 
         const history = new History({
             toolId,
@@ -133,8 +154,8 @@ router.post('/checkin', async (req, res) => {
             return res.status(400).json({ message: 'Tool is currently checked in' });
         }
 
-        tool.status = '1';
-        await tool.save();
+        // tool.status = '1';
+        // await tool.save();
 
         const history = await History.findOneAndUpdate(
             { toolId, userId, checkIn: null },
