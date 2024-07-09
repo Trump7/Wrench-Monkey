@@ -109,6 +109,8 @@ const Tools = ({ admin }) => {
       setToolToRemove(null);
     } catch (error) {
       console.error('Error removing tool:', error);
+      setErrorMessage('Error removing job.');
+      setShowErrorPopup(true);
     }
   };
 
@@ -150,6 +152,8 @@ const Tools = ({ admin }) => {
       fetchJobs();
     } catch (error) {
       console.error('Error editing job:', error);
+      setErrorMessage('Error editing job.');
+      setShowErrorPopup(true);
     }
   };
   
@@ -186,6 +190,23 @@ const Tools = ({ admin }) => {
     setToolToEdit(prevState => ({
       ...prevState,
       [name]: value
+    }));
+  };
+
+  const handleEditJobChange = (e) => {
+    const { name, value } = e.target;
+    setJobToEdit(prevState => ({
+      ...prevState,
+      [name]: value
+    }));
+  };
+
+  const handleEditToolSelection = (toolId) => {
+    setJobToEdit(prevState => ({
+      ...prevState,
+      tools: prevState.tools.includes(toolId)
+        ? prevState.tools.filter(id => id !== toolId)
+        : [...prevState.tools, toolId]
     }));
   };
 
@@ -555,12 +576,11 @@ const Tools = ({ admin }) => {
           </div>
         </div>
       )}
-
       {showEditJobPopup && (
         <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg w-1/3">
             <h3 className="text-lg font-bold mb-4">Edit Job</h3>
-            <input type="text" name="name" value={jobToEdit.name} onChange={handleEditChange} placeholder="Enter job name" className="border border-gray-300 rounded-md p-2 mb-4 w-full" />
+            <input type="text" name="name" value={jobToEdit.name} onChange={handleEditJobChange} placeholder="Enter job name" className="border border-gray-300 rounded-md p-2 mb-4 w-full" />
             <h4 className="text-md font-bold mb-2">Select Tools (2-4)</h4>
             <div className="grid grid-cols-1 gap-2 mb-4">
               {tools.map(tool => (
@@ -568,7 +588,7 @@ const Tools = ({ admin }) => {
                   <input
                     type="checkbox"
                     value={tool._id}
-                    onChange={() => handleToolSelection(tool._id)}
+                    onChange={() => handleEditToolSelection(tool._id)}
                     className="mr-2"
                     checked={jobToEdit.tools.includes(tool._id)}
                   />
@@ -591,7 +611,6 @@ const Tools = ({ admin }) => {
           </div>
         </div>
       )}
-
       {showCheckoutJobPopup && (
         <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg w-1/3">
