@@ -17,16 +17,20 @@ const Tools = ({ admin }) => {
   const [showCheckinPopup, setShowCheckinPopup] = useState(false);
   const [checkinTool, setCheckinTool] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
-  const [newTool, setNewTool] = useState({
-    name: '',
-    slot: ''
-  });
+  const [newTool, setNewTool] = useState({name: '',slot: ''});
   const [toolToRemove, setToolToRemove] = useState(null);
-  const [toolToEdit, setToolToEdit] = useState({
-    id: null,
-    name: '',
-    slot: ''
-  });
+  const [toolToEdit, setToolToEdit] = useState({id: null,name: '',slot: ''});
+  
+  //jobs variables
+  const [jobs, setJobs] = useState([]);
+  const [showAddJobPopup, setShowAddJobPopup] = useState(false);
+  const [showRemoveJobPopup, setShowRemoveJobPopup] = useState(false);
+  const [showEditJobPopup, setShowEditJobPopup] = useState(false);  
+  const [showCheckoutJobPopup, setShowCheckoutJobPopup] = useState(false);
+  const [checkoutJob, setCheckoutJob] = useState(null);
+  const [newJob, setNewJob] = useState({name: '',tools: []});
+  const [jobToRemove, setJobToRemove] = useState(null);
+  const [jobToEdit, setJobToEdit] = useState({id: null,name: '',tools: []});
 
   const fetchTools = async () => {
     try {
@@ -37,8 +41,19 @@ const Tools = ({ admin }) => {
     }
   };
 
+  const fetchJobs = async () => {
+    try {
+      const response = await axios.get(`${config.apiURL}/jobs`);
+      setJobs(response.data);
+    } catch (error) {
+      console.error('Error fetching jobs:', error);
+    }
+  };
+  
+
   useEffect(() => {
     fetchTools(); // Fetch initial tools
+    fetchJobs();
 
     const cleanupEventSource = eventSourceManager(() => {}, setTools, () => {}); // Only setTools handler
 
@@ -69,6 +84,24 @@ const Tools = ({ admin }) => {
     }
   };
 
+  const handleAddJob = async () => {
+    if (newJob.tools.length < 2 || newJob.tools.length > 4) {
+      setErrorMessage('A job must have between 2 and 4 tools.');
+      setShowAddJobPopup(false);
+      setShowErrorPopup(true);
+      return;
+    }
+    try {
+      await axios.post(`${config.apiURL}/jobs`, newJob);
+      setNewJob({ name: '', tools: [] });
+      setShowAddJobPopup(false);
+      fetchJobs();
+    } catch (error) {
+      console.error('Error adding job:', error);
+    }
+  };
+  
+
   const handleRemoveTool = async () => {
     try {
       await axios.delete(`${config.apiURL}/tools/${toolToRemove}`);
@@ -78,6 +111,18 @@ const Tools = ({ admin }) => {
       console.error('Error removing tool:', error);
     }
   };
+
+  const handleRemoveJob = async () => {
+    try {
+      await axios.delete(`${config.apiURL}/jobs/${jobToRemove}`);
+      setShowRemoveJobPopup(false);
+      setJobToRemove(null);
+      fetchJobs();
+    } catch (error) {
+      console.error('Error removing job:', error);
+    }
+  };
+  
 
   const handleEditTool = async () => {
     if (tools.some(tool => tool.slot === toolToEdit.slot && tool._id !== toolToEdit.id)) {
@@ -96,6 +141,19 @@ const Tools = ({ admin }) => {
     }
   };
 
+  const handleEditJob = async () => {
+    try {
+      const { id, ...updatedJob } = jobToEdit;
+      await axios.put(`${config.apiURL}/jobs/${id}`, updatedJob);
+      setShowEditJobPopup(false);
+      setJobToEdit({ id: null, name: '', tools: [] });
+      fetchJobs();
+    } catch (error) {
+      console.error('Error editing job:', error);
+    }
+  };
+  
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setNewTool(prevState => ({
@@ -103,6 +161,25 @@ const Tools = ({ admin }) => {
       [name]: value
     }));
   };
+
+  const handleJobChange = (e) => {
+    const { name, value } = e.target;
+    setNewJob(prevState => ({
+      ...prevState,
+      [name]: value
+    }));
+  };
+  
+
+  const handleToolSelection = (toolId) => {
+    setNewJob(prevState => ({
+      ...prevState,
+      tools: prevState.tools.includes(toolId)
+        ? prevState.tools.filter(id => id !== toolId)
+        : [...prevState.tools, toolId]
+    }));
+  };
+  
 
   const handleEditChange = (e) => {
     const { name, value } = e.target;
@@ -122,6 +199,29 @@ const Tools = ({ admin }) => {
     setCheckoutTool(tool);
     setShowCheckoutPopup(true);
   };
+
+  const handleCheckoutJob = async (jobId) => {
+    const job = jobs.find(j => j._id === jobId);
+    const toolsToCheckout = job.tools.map(toolId => tools.find(tool => tool._id === toolId));
+  
+    if (toolsToCheckout.some(tool => tool.status !== '0')) {
+      setErrorMessage('One or more tools are not available for checkout.');
+      setShowErrorPopup(true);
+      return;
+    }
+  
+    try {
+      const userId = getUserId();
+      await axios.post(`${config.apiURL}/jobs/checkout`, { jobId, userId });
+      fetchTools();
+      fetchJobs();
+    } catch (error) {
+      console.error(error);
+      setErrorMessage('Error checking out job.');
+      setShowErrorPopup(true);
+    }
+  };
+  
 
   const confirmCheckout = async () => {
     try {
@@ -228,6 +328,31 @@ const Tools = ({ admin }) => {
           </div>
         ))}
       </div>
+      <h2 className="bg-gray-700 p-4 rounded-lg mt-8 mb-4 text-white font-custom font-bold text-center text-2xl">Jobs</h2>
+      {admin && (
+        <div className="flex justify-center mb-6">
+          <div className="flex justify-center w-full">
+            <button
+              onClick={() => setShowAddJobPopup(true)}
+              className="font-custom flex-grow bg-gray-700 hover:bg-gray-900 text-white py-2 px-7 rounded mx-1">
+              Add Job
+            </button>
+          </div>
+        </div>
+      )}
+      <div className="grid grid-cols-1 gap-4">
+        {jobs.map(job => (
+          <div key={job._id} className="rounded-lg bg-gray-700 p-4 text-white flex justify-between items-center font-custom">
+            <span>{job.name}</span>
+            <button
+              onClick={() => handleCheckoutJob(job._id)}
+              className="font-custom bg-blue-500 hover:bg-blue-700 text-white text-sm py-2 px-1 rounded">
+              Check Out Job
+            </button>
+          </div>
+        ))}
+      </div>
+
       {showCheckoutPopup && (
         <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg w-1/3">
@@ -354,6 +479,119 @@ const Tools = ({ admin }) => {
           </div>
         </div>
       )}
+      {showAddJobPopup && (
+        <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg w-1/3">
+            <h3 className="text-lg font-bold mb-4">Add New Job</h3>
+            <input type="text" name="name" value={newJob.name} onChange={handleJobChange} placeholder="Enter job name" className="border border-gray-300 rounded-md p-2 mb-4 w-full" />
+            <h4 className="text-md font-bold mb-2">Select Tools (2-4)</h4>
+            <div className="grid grid-cols-1 gap-2 mb-4">
+              {tools.map(tool => (
+                <label key={tool._id} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    value={tool._id}
+                    onChange={() => handleToolSelection(tool._id)}
+                    className="mr-2"
+                    checked={newJob.tools.includes(tool._id)}
+                  />
+                  <span>{tool.name}</span>
+                </label>
+              ))}
+            </div>
+            <div className="flex justify-end">
+              <button
+                onClick={() => setShowAddJobPopup(false)}
+                className="font-custom bg-gray-700 hover:bg-gray-900 text-white font-bold py-2 px-4 rounded mr-4">
+                Cancel
+              </button>
+              <button
+                onClick={handleAddJob}
+                className="font-custom bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                Add
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showRemoveJobPopup && (
+        <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg w-1/3">
+            <h3 className="text-lg font-bold mb-4">Are you sure you would like to remove this job?</h3>
+            <div className="flex justify-end">
+              <button
+                onClick={() => setShowRemoveJobPopup(false)}
+                className="font-custom bg-gray-700 hover:bg-gray-900 text-white font-bold py-2 px-4 rounded mr-4">
+                No
+              </button>
+              <button
+                onClick={handleRemoveJob}
+                className="font-custom bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                Yes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showEditJobPopup && (
+        <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg w-1/3">
+            <h3 className="text-lg font-bold mb-4">Edit Job</h3>
+            <input type="text" name="name" value={jobToEdit.name} onChange={handleEditChange} placeholder="Enter job name" className="border border-gray-300 rounded-md p-2 mb-4 w-full" />
+            <h4 className="text-md font-bold mb-2">Select Tools (2-4)</h4>
+            <div className="grid grid-cols-1 gap-2 mb-4">
+              {tools.map(tool => (
+                <label key={tool._id} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    value={tool._id}
+                    onChange={() => handleToolSelection(tool._id)}
+                    className="mr-2"
+                    checked={jobToEdit.tools.includes(tool._id)}
+                  />
+                  <span>{tool.name}</span>
+                </label>
+              ))}
+            </div>
+            <div className="flex justify-end">
+              <button
+                onClick={() => setShowEditJobPopup(false)}
+                className="font-custom bg-gray-700 hover:bg-gray-900 text-white font-bold py-2 px-4 rounded mr-4">
+                Cancel
+              </button>
+              <button
+                onClick={handleEditJob}
+                className="font-custom bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showCheckoutJobPopup && (
+        <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg w-1/3">
+            <h3 className="text-lg font-custom font-bold mb-4">Confirm Checkout Job</h3>
+            <p className="font-custom mb-4">Are you sure you want to check out this job?</p>
+            <div className="flex justify-end">
+              <button
+                onClick={() => setShowCheckoutJobPopup(false)}
+                className="font-custom bg-gray-700 hover:bg-gray-900 text-white font-bold py-2 px-4 rounded mr-4">
+                No
+              </button>
+              <button
+                onClick={handleCheckoutJob}
+                className="font-custom bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                Yes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
