@@ -67,8 +67,6 @@ router.post('/checkout', async (req, res) => {
       if (tool.status !== '0') {
         return res.status(400).json({ message: 'One or more tools are not available for checkout' });
       }
-      tool.status = '1';
-      await tool.save();
     }
 
     res.json(job);
