@@ -344,11 +344,32 @@ const Tools = ({ admin }) => {
         {jobs.map(job => (
           <div key={job._id} className="rounded-lg bg-gray-700 p-4 text-white flex justify-between items-center font-custom">
             <span>{job.name}</span>
-            <button
-              onClick={() => handleCheckoutJob(job._id)}
-              className="font-custom bg-blue-500 hover:bg-blue-700 text-white text-sm py-2 px-1 rounded">
-              Check Out Job
-            </button>
+            {admin ? (
+              <>
+                <button
+                  onClick={() => {
+                    setJobToEdit({ id: job._id, name: job.name, tools: job.tools });
+                    setShowEditJobPopup(true);
+                  }}
+                  className="font-custom bg-gray-700 hover:bg-gray-900 text-white text-sm py-2 px-1 rounded">
+                  Edit
+                </button>
+                <button
+                  onClick={() => {
+                    setJobToRemove(job._id);
+                    setShowRemoveJobPopup(true);
+                  }}
+                  className="font-custom bg-gray-700 hover:bg-gray-900 text-white text-sm py-2 px-1 rounded">
+                  Remove
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => handleCheckoutJob(job._id)}
+                className="font-custom bg-blue-500 hover:bg-blue-700 text-white text-sm py-2 px-1 rounded">
+                Check Out Job
+              </button>
+            )}
           </div>
         ))}
       </div>
@@ -591,6 +612,8 @@ const Tools = ({ admin }) => {
           </div>
         </div>
       )}
+
+
 
     </div>
   );
