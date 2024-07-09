@@ -63,7 +63,7 @@ const History = () => {
                     className="flex-grow px-4 py-2 rounded-lg border border-gray-400 focus:outline-none focus:border-blue-500"
                 />
             </div>
-            <div className="flex-grow custom-scrollbar">
+            <div className="flex-grow overflow-y-auto custom-scrollbar">
                 <div className="grid grid-cols-1 gap-4">
                     {filteredHistory.map(historyItem => (
                         <div key={historyItem._id} className="rounded-lg bg-gray-700 p-4 text-white font-custom text-sm">
