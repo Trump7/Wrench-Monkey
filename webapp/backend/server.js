@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const authRoutes = require('./routes/auth');
 const toolRoutes = require('./routes/tools');
+const jobRoutes = require('./routes/jobs');
 const userRoutes = require('./routes/users');
 const statusRoutes = require('./routes/status');
 const historyRoutes = require('./routes/history');
@@ -13,6 +14,7 @@ require('dotenv').config();
 
 const Tool = require('./models/Tool');
 const Status = require('./models/Status');
+const Job = require('./models/Job');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -30,6 +32,7 @@ mongoose.connect(process.env.MONGO_URI, {
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/tools', toolRoutes);
+app.use('/api/jobs', jobRoutes);
 app.use('/api/history', historyRoutes);
 app.use('/api/status', statusRoutes);
 
@@ -77,6 +80,20 @@ const initializeTools = async () => {
   }
 };
 
+const initializeJobs = async () => {
+  try {
+    const jobs = await Job.find().populate('tools');
+    if (jobs) {
+      broadcastEvent(jobs, 'jobs');
+    } else {
+      console.log('No initial jobs found in the database.');
+    }
+  } catch (error) {
+    console.error('Error initializing jobs:', error);
+  }
+};
+
 // Call the function to initialize status and tools
 initializeStatus();
 initializeTools();
+initializeJobs();
