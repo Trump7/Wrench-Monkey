@@ -264,23 +264,35 @@ const Tools = ({ admin }) => {
     const job = jobs.find(j => j._id === jobId);
     const toolsToCheckout = job.tools.map(toolId => tools.find(tool => tool._id === toolId));
   
-    if (toolsToCheckout.some(tool => tool.status !== '0')) {
+    if (toolsToCheckout.some(tool => tool.status !== '1')) {
       setErrorMessage('One or more tools are not available for checkout.');
       setShowErrorPopup(true);
       return;
     }
   
+    setCheckoutJob({ jobId, tools: toolsToCheckout });
+    setShowCheckoutJobPopup(true);
+  };
+
+  const confirmCheckoutJob = async () => {
+    const { jobId, tools } = checkoutJob;
+
     try {
       const userId = getUserId();
-      await axios.post(`${config.apiURL}/jobs/checkout`, { jobId, userId });
+      const timestamp = new Date().toISOString();
+      await axios.post(`${config.apiURL}/jobs/checkout`, { jobId, userId, timestamp });
       fetchTools();
       fetchJobs();
+      setShowCheckoutJobPopup(false);
+      setCheckoutJob(null);
     } catch (error) {
       console.error(error);
       setErrorMessage('Error checking out job.');
       setShowErrorPopup(true);
     }
   };
+
+
   
 
   const confirmCheckout = async () => {
@@ -651,7 +663,12 @@ const Tools = ({ admin }) => {
         <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg w-1/3">
             <h3 className="text-lg font-custom font-bold mb-4">Confirm Checkout Job</h3>
-            <p className="font-custom mb-4">Are you sure you want to check out this job?</p>
+            <p className="font-custom mb-4">Are you sure you want to check out this job with the following tools?</p>
+            <ul className="mb-4">
+              {checkoutJob.tools.map(tool => (
+                <li key={tool._id} className="font-custom">{tool.name}</li>
+              ))}
+            </ul>
             <div className="flex justify-end">
               <button
                 onClick={() => setShowCheckoutJobPopup(false)}
@@ -659,7 +676,7 @@ const Tools = ({ admin }) => {
                 No
               </button>
               <button
-                onClick={handleCheckoutJob}
+                onClick={confirmCheckoutJob}
                 className="font-custom bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
                 Yes
               </button>
@@ -667,9 +684,6 @@ const Tools = ({ admin }) => {
           </div>
         </div>
       )}
-
-
-
     </div>
   );
 };
