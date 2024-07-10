@@ -78,7 +78,7 @@ const CurrentStatus = () => {
         <div>
             <h2 className="bg-gray-700 p-4 rounded-lg mb-4 text-white font-custom text-center text-2xl">Current Status</h2>
             <div className="flex justify-center mb-6">
-                <img src={robot} alt="Robot" className="w-60 h-auto rounded" />
+                {/* <img src={robot} alt="Robot" className="w-60 h-auto rounded" /> */}
             </div>
             <div className="flex justify-center mb-6">
                 <div className="bg-gray-700 rounded-lg p-3 w-96 flex flex-col items-start">

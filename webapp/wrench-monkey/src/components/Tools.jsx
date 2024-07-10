@@ -144,8 +144,24 @@ const Tools = ({ admin }) => {
   };
 
   const handleEditJob = async () => {
+    if (!jobToEdit.name.trim()) {
+      setErrorMessage('Job name cannot be blank.');
+      setShowEditJobPopup(false);
+      setShowErrorPopup(true);
+      return;
+    }
+  
+    if (jobToEdit.tools.length < 2) {
+      setErrorMessage('A job must have at least two tools.');
+      setShowEditJobPopup(false);
+      setShowErrorPopup(true);
+      return;
+    }
+  
     try {
-      const { id, ...updatedJob } = jobToEdit;
+      const { id, name, tools } = jobToEdit;
+      const updatedJob = { name, tools: tools.map(tool => typeof tool === 'object' ? tool._id : tool) };
+  
       await axios.put(`${config.apiURL}/jobs/${id}`, updatedJob);
       setShowEditJobPopup(false);
       setJobToEdit({ id: null, name: '', tools: [] });
@@ -156,6 +172,8 @@ const Tools = ({ admin }) => {
       setShowErrorPopup(true);
     }
   };
+  
+  
   
 
   const handleChange = (e) => {
@@ -173,7 +191,6 @@ const Tools = ({ admin }) => {
       [name]: value
     }));
   };
-  
 
   const handleToolSelection = (toolId) => {
     setNewJob(prevState => ({
@@ -184,7 +201,6 @@ const Tools = ({ admin }) => {
     }));
   };
   
-
   const handleEditChange = (e) => {
     const { name, value } = e.target;
     setToolToEdit(prevState => ({
@@ -195,20 +211,43 @@ const Tools = ({ admin }) => {
 
   const handleEditJobChange = (e) => {
     const { name, value } = e.target;
+    console.log('Before update:', jobToEdit);
     setJobToEdit(prevState => ({
       ...prevState,
       [name]: value
     }));
+    console.log('After update:', jobToEdit);
   };
+  
 
   const handleEditToolSelection = (toolId) => {
-    setJobToEdit(prevState => ({
-      ...prevState,
-      tools: prevState.tools.includes(toolId)
-        ? prevState.tools.filter(id => id !== toolId)
-        : [...prevState.tools, toolId]
-    }));
+    console.log(`Toggling tool selection for tool ID: ${toolId}`);
+  
+    setJobToEdit(prevState => {
+      // Create an array of tool IDs (handling both object and ID cases)
+      const toolIds = prevState.tools.map(tool => typeof tool === 'object' ? tool._id : tool);
+  
+      const updatedTools = toolIds.includes(toolId)
+        ? toolIds.filter(id => id !== toolId)  // Remove the tool if already selected
+        : [...toolIds, toolId];                // Add the tool if not already selected
+  
+      console.log('Updated tools:', updatedTools);
+      return {
+        ...prevState,
+        tools: updatedTools
+      };
+    });
   };
+  
+  
+  
+
+  const handleOpenEditJobPopup = (job) => {
+    console.log('Opening edit job popup with job:', job);
+    setJobToEdit({ id: job._id, name: job.name, tools: [...job.tools] });
+    setShowEditJobPopup(true);
+  };
+  
 
   const handleCheckout = async (toolId) => {
     const tool = tools.find(t => t._id === toolId);
@@ -368,10 +407,7 @@ const Tools = ({ admin }) => {
             {admin ? (
               <>
                 <button
-                  onClick={() => {
-                    setJobToEdit({ id: job._id, name: job.name, tools: job.tools });
-                    setShowEditJobPopup(true);
-                  }}
+                  onClick={() => handleOpenEditJobPopup(job)}
                   className="font-custom bg-gray-700 hover:bg-gray-900 text-white text-sm py-2 px-1 rounded">
                   Edit
                 </button>
@@ -524,12 +560,12 @@ const Tools = ({ admin }) => {
       {showAddJobPopup && (
         <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg w-1/3">
-            <h3 className="text-lg font-bold mb-4">Add New Job</h3>
-            <input type="text" name="name" value={newJob.name} onChange={handleJobChange} placeholder="Enter job name" className="border border-gray-300 rounded-md p-2 mb-4 w-full" />
-            <h4 className="text-md font-bold mb-2">Select Tools (2-4)</h4>
+            <h3 className="text-lg font-bold mb-4 font-custom">Add New Job</h3>
+            <input type="text" name="name" value={newJob.name} onChange={handleJobChange} placeholder="Enter job name" className="font-custom border border-gray-300 rounded-md p-2 mb-4 w-full" />
+            <h4 className="text-md font-bold mb-2 font-custom">Select Tools (2-4)</h4>
             <div className="grid grid-cols-1 gap-2 mb-4">
               {tools.map(tool => (
-                <label key={tool._id} className="flex items-center">
+                <label key={tool._id} className="font-custom flex items-center">
                   <input
                     type="checkbox"
                     value={tool._id}
@@ -560,7 +596,7 @@ const Tools = ({ admin }) => {
       {showRemoveJobPopup && (
         <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg w-1/3">
-            <h3 className="text-lg font-bold mb-4">Are you sure you would like to remove this job?</h3>
+            <h3 className="text-lg font-bold mb-4 font-custom">Are you sure you would like to remove this job?</h3>
             <div className="flex justify-end">
               <button
                 onClick={() => setShowRemoveJobPopup(false)}
@@ -579,18 +615,18 @@ const Tools = ({ admin }) => {
       {showEditJobPopup && (
         <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg w-1/3">
-            <h3 className="text-lg font-bold mb-4">Edit Job</h3>
-            <input type="text" name="name" value={jobToEdit.name} onChange={handleEditJobChange} placeholder="Enter job name" className="border border-gray-300 rounded-md p-2 mb-4 w-full" />
-            <h4 className="text-md font-bold mb-2">Select Tools (2-4)</h4>
+            <h3 className="text-lg font-bold mb-4 font-custom">Edit Job</h3>
+            <input type="text" name="name" value={jobToEdit.name} onChange={handleEditJobChange} placeholder="Enter job name" className="font-custom border border-gray-300 rounded-md p-2 mb-4 w-full" />
+            <h4 className="text-md font-bold mb-2 font-custom">Select Tools (2-4)</h4>
             <div className="grid grid-cols-1 gap-2 mb-4">
               {tools.map(tool => (
-                <label key={tool._id} className="flex items-center">
+                <label key={tool._id} className="font-custom flex items-center">
                   <input
                     type="checkbox"
                     value={tool._id}
                     onChange={() => handleEditToolSelection(tool._id)}
                     className="mr-2"
-                    checked={jobToEdit.tools.includes(tool._id)}
+                    checked={jobToEdit.tools.some(id => (typeof id === 'object' ? id._id : id) === tool._id)}
                   />
                   <span>{tool.name}</span>
                 </label>

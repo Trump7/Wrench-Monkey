@@ -54,7 +54,7 @@ const History = () => {
     return (
         <div className="h-screen flex flex-col">
             <h2 className="bg-gray-700 p-4 rounded-lg mb-4 text-white font-bold font-custom text-center text-2xl">History</h2>
-            <div className="flex justify-center mb-4">
+            <div className="font-custom flex justify-center mb-4">
                 <input
                     type="text"
                     placeholder="Search History"
