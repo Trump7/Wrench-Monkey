@@ -263,7 +263,11 @@ const Tools = ({ admin }) => {
   const handleCheckoutJob = async (jobId) => {
     const job = jobs.find(j => j._id === jobId);
     const toolsToCheckout = job.tools.map(toolId => tools.find(tool => tool._id === toolId));
-  
+    
+    // Debugging logs
+    console.log('Job tools:', job.tools);
+    console.log('Tools to checkout:', toolsToCheckout);
+    
     if (toolsToCheckout.some(tool => tool.status !== '1')) {
       setErrorMessage('One or more tools are not available for checkout.');
       setShowErrorPopup(true);
