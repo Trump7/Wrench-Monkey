@@ -1,25 +1,40 @@
 import config from '../config';
 
 const eventSourceManager = (setStatus, setTools, setHistory) => {
-    const eventSource = new EventSource(`${config.apiURL}/stream`);
+    let eventSource = new EventSource(`${config.apiURL}/stream`);
 
-    eventSource.onmessage = (event) => {
-        const parsedData = JSON.parse(event.data);
-        if (parsedData.type === 'status') {
-            //console.log('Received status:', parsedData.data);
-            setStatus(parsedData.data);
-        } else if (parsedData.type === 'tools') {
-            //console.log('Received tools:', parsedData.data);
-            setTools(parsedData.data);
-        } else if (parsedData.type === 'history') {
-            //console.log('Received history:', parsedData.data);
-            setHistory(parsedData.data);
-        }
+    const setupEventSource = () => {
+        eventSource.onmessage = (event) => {
+            const parsedData = JSON.parse(event.data);
+            if (parsedData.type === 'status') {
+                //console.log('Received status:', parsedData.data);
+                setStatus(parsedData.data);
+            } else if (parsedData.type === 'tools') {
+                //console.log('Received tools:', parsedData.data);
+                setTools(parsedData.data);
+            } else if (parsedData.type === 'history') {
+                //console.log('Received history:', parsedData.data);
+                setHistory(parsedData.data);
+            }
+        };
+
+        eventSource.onerror = (error) => {
+            console.error('EventSource error:', error);
+
+            if (eventSource.readyState === EventSource.CLOSED || eventSource.readyState === EventSource.CONNECTING) {
+                console.log('Reconnecting EventSource...');
+                eventSource.close();
+
+                // Reconnect after a delay
+                setTimeout(() => {
+                    eventSource = new EventSource(`${config.apiURL}/stream`);
+                    setupEventSource();
+                }, 3000);
+            }
+        };
     };
 
-    eventSource.onerror = (error) => {
-        console.error('EventSource error:', error);
-    };
+    setupEventSource();
 
     return () => {
         eventSource.close();

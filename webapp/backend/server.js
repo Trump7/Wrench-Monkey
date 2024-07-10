@@ -44,7 +44,12 @@ app.get('/api/stream', (req, res) => {
 
   addClient(res);
 
+  const intervalId = setInterval(() => {
+    res.write(': keep-alive\n\n');
+  }, 25000);
+
   req.on('close', () => {
+    clearInterval(intervalId);
     removeClient(res);
   });
 });
