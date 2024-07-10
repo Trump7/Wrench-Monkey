@@ -1,7 +1,9 @@
 const express = require('express');
-const router = express.Router();
 const Job = require('../models/Job');
 const Tool = require('../models/Tool');
+const { broadcastEvent } = require('../sse');
+
+const router = express.Router();
 
 // Get all jobs
 router.get('/', async (req, res) => {
@@ -31,11 +33,14 @@ router.post('/', async (req, res) => {
 // Remove a job
 router.delete('/:id', async (req, res) => {
   try {
-    const job = await Job.findById(req.params.id);
+    const job = await Job.findByIdAndDelete(req.params.id);
     if (!job) return res.status(404).json({ message: 'Job not found' });
 
-    await job.remove();
-    res.json({ message: 'Job removed' });
+    const jobs = await Job.find();
+    broadcastEvent(jobs, 'jobs');
+
+
+    res.status(200).json({ message: 'Job removed' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
