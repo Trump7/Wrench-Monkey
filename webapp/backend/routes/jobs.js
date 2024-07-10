@@ -1,7 +1,9 @@
 const express = require('express');
 const Job = require('../models/Job');
 const Tool = require('../models/Tool');
+const History = require('../models/History');
 const { broadcastEvent } = require('../sse');
+const { sendCommandToRobot } = require('../websocket');
 
 const router = express.Router();
 
