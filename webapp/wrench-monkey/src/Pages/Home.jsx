@@ -1,6 +1,6 @@
 import React from 'react';
 import Button from '../components/Button';
-import robot from '../../src/assets/logo.jpg';
+import robot from '../../src/assets/roboto.png';
 
 const Home = () => {
     return (
@@ -15,11 +15,12 @@ const Home = () => {
 
                     {/* Right Column: Title and Description */}
                     <div className="md:w-1/2 p-4">
-                        <h1 className="text-5xl font-bold mb-4 font-custom">Senior Design UCF</h1>
+                        <h1 className="text-5xl font-bold mb-4 font-custom">UCF Senior Design</h1>
                         <p className="text-lg font-custom">
-                            This is a description of our project. Here we can explain the purpose, features, and other
-                            details about the robot and the project. Make sure to provide enough information to engage
-                            your audience and give them a clear understanding of what your project is about.
+                        For decades, robotics have transformed industries by automating tasks and enhancing efficiency. 
+                        Our project aims to improve tool management in the shared workspaces by creating a smart toolbox called the Wrench Monkey. 
+                        It has two main functions, tool transportation and identification. Through this website, the toolbox can be called 
+                        to individual work stations, as well as identify the requested tool to make tool selection and return efficient.
                         </p>
                     </div>
                 </div>

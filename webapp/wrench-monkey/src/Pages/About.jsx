@@ -3,30 +3,30 @@ import React from 'react';
 const teamMembers = [
     {
         name: 'Matthew Trump',
-        role: 'Unknown Role',
+        role: 'Website and App Design, Software Design, Communication between Website and Project, Software Troubleshooting',
         degree: 'Computer Engineering',
-        description: 'To Be Filled.',
+        description: 'Matthew Trump is an aspiring computer engineering major at UCF. His interests include C, C++, Java, and JavaScript programming as well as tinkering with arduinos and other microcontrollers. Beyond his major, he enjoys gardening, building Legos, and video games. He is set to graduate from UCF the Summer of 2024.',
         image: '../../src/assets/matt-t.jpg'
     },
     {
         name: 'William Wandelt',
-        role: 'Unknown Role',
+        role: 'PCB Design and Assembly, Power System Design, Hardware Troubleshooting',
         degree: 'Electrical Engineering',
-        description: 'To Be Filled.',
+        description: 'William Wandelt is an electrical engineering student at UCF, with deep interests in analog and digital circuit design. He will be graduating in Summer 2024, working as a hardware engineer for Ford.',
         image: '../../src/assets/will-w.png'
     },
     {
         name: 'Rachel Sak',
-        role: 'Unknown Role',
+        role: 'PCB Design, Tool Detection Subsystem, Hardware Troubleshooting',
         degree: 'Electrical Engineering',
-        description: 'To Be Filled.',
+        description: 'Rachael Sak is an electrical engineering major at the University of Central Florida. She will graduate in August of 2024 with a Bachelors degree. From there she plans on going to work for Naval Nuclear Laboratories.',
         image: '../../src/assets/rach-s.png'
     },
     {
         name: 'Matthew Crespo',
-        role: 'Unknown Role',
+        role: 'PCB Design, Motor Controls, Line Following Functionality, Hardware Troubleshooting',
         degree: 'Electrical Engineering',
-        description: 'To Be Filled.',
+        description: 'Matthew Crespo is an electrical engineering major at the University of Central Florida (UCF). He has great interest in areas such as controls, artificial intelligence, signal processing, and most math/physics related topics. He will be graduating from UCF the Summer of 2024 and will continue to attend UCF for his PhD in Electrical Engineering.',
         image: '../../src/assets/matt-c.png'
     },
 ];
