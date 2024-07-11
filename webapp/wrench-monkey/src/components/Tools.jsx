@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import '../index.css';
 import config from '../config';
+import './custom-scrollbar.css';
 import { getUserId } from '../utilities/auth';
 import { eventSourceManager } from '../utilities/eventSource';
 
@@ -348,7 +349,7 @@ const Tools = ({ admin }) => {
   const availableSlots = [1, 2, 3, 4];
 
   return (
-    <div>
+    <div className="h-screen flex flex-col">
       <h2 className="bg-gray-700 p-4 rounded-lg mb-4 text-white font-custom font-bold text-center text-2xl">Tools</h2>
       {admin && (
         <div className="flex justify-center mb-6">
@@ -414,37 +415,38 @@ const Tools = ({ admin }) => {
           </div>
         </div>
       )}
-      <div className="grid grid-cols-1 gap-4">
-        {jobs.map(job => (
-          <div key={job._id} className="rounded-lg bg-gray-700 p-4 text-white flex justify-between items-center font-custom">
-            <span>{job.name}</span>
-            {admin ? (
-              <>
+      <div className="flex-grow overflow-y-auto custom-scrollbar mb-5">
+        <div className="grid grid-cols-1 gap-4">
+          {jobs.map(job => (
+            <div key={job._id} className="rounded-lg bg-gray-700 p-4 text-white flex justify-between items-center font-custom">
+              <span>{job.name}</span>
+              {admin ? (
+                <>
+                  <button
+                    onClick={() => handleOpenEditJobPopup(job)}
+                    className="font-custom bg-gray-700 hover:bg-gray-900 text-white text-sm py-2 px-1 rounded">
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => {
+                      setJobToRemove(job._id);
+                      setShowRemoveJobPopup(true);
+                    }}
+                    className="font-custom bg-gray-700 hover:bg-gray-900 text-white text-sm py-2 px-1 rounded">
+                    Remove
+                  </button>
+                </>
+              ) : (
                 <button
-                  onClick={() => handleOpenEditJobPopup(job)}
-                  className="font-custom bg-gray-700 hover:bg-gray-900 text-white text-sm py-2 px-1 rounded">
-                  Edit
+                  onClick={() => handleCheckoutJob(job._id)}
+                  className="font-custom bg-blue-500 hover:bg-blue-700 text-white text-sm py-2 px-1 rounded">
+                  Check Out Job
                 </button>
-                <button
-                  onClick={() => {
-                    setJobToRemove(job._id);
-                    setShowRemoveJobPopup(true);
-                  }}
-                  className="font-custom bg-gray-700 hover:bg-gray-900 text-white text-sm py-2 px-1 rounded">
-                  Remove
-                </button>
-              </>
-            ) : (
-              <button
-                onClick={() => handleCheckoutJob(job._id)}
-                className="font-custom bg-blue-500 hover:bg-blue-700 text-white text-sm py-2 px-1 rounded">
-                Check Out Job
-              </button>
-            )}
-          </div>
-        ))}
+              )}
+            </div>
+          ))}
+        </div>
       </div>
-
       {showCheckoutPopup && (
         <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg w-1/3">

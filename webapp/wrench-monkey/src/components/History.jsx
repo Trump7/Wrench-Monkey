@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import '../index.css';
-import './custom-scrollbar.css'; // Import the custom scrollbar styles
+import './custom-scrollbar.css';
 import config from '../config';
 import { eventSourceManager } from '../utilities/eventSource';
 
