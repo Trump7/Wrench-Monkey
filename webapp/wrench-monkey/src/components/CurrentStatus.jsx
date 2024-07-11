@@ -16,13 +16,21 @@ const CurrentStatus = () => {
     const fetchInitialStatus = async () => {
         try {
             const response = await axios.get(`${config.apiURL}/status`);
-            setStatus(response.data);
+            setStatus(prevStatus => ({
+                ...response.data,
+                lastChecked: new Date().toISOString()
+            }));
         } catch (error) {
             console.error('Error fetching initial status:', error);
         }
     };
 
     const handleStationClick = (station) => {
+        if(!status.isConnected){
+            setErrorMessage('Cannot travel to station. Robot is not connected.');
+            setShowErrorPopup(true);
+            return;
+        }
         setSelectedStation(station);
         setShowPrompt(true);
     };
@@ -63,7 +71,12 @@ const CurrentStatus = () => {
     useEffect(() => {
         fetchInitialStatus(); // Fetch initial status
 
-        const cleanupEventSource = eventSourceManager(setStatus, () => {}, () => {}); // Only setStatus handler
+        const cleanupEventSource = eventSourceManager((newStatus) => {
+            setStatus(prevStatus => ({
+                ...newStatus,
+                lastChecked: new Date().toISOString()
+            }));
+        }, () => {}, () => {}); // Only setStatus handler
 
         return () => {
             cleanupEventSource();
@@ -101,6 +114,14 @@ const CurrentStatus = () => {
                     <span className={`w-40 h-6 rounded-full ${status.isTraveling ? 'bg-green-500' : 'bg-red-500'}`}></span>
                 </div>
             </div>
+            {status.isTraveling && (
+                <div className="flex justify-center mb-6">
+                    <div className="bg-gray-700 rounded-lg p-3 w-60 flex items-center justify-between">
+                        <span className="text-white font-custom">Destination:</span>
+                        <span className="text-white">{status.destinationStation}</span>
+                    </div>
+                </div>
+            )}
             <div className="flex justify-center mb-6">
                 <img src={track} alt="Robot Track" className="w-90 h-auto rounded" />
             </div>
@@ -173,14 +194,6 @@ const CurrentStatus = () => {
                                 OK
                             </button>
                         </div>
-                    </div>
-                </div>
-            )}
-            {status.isTraveling && (
-                <div className="flex justify-center mb-6">
-                    <div className="bg-gray-700 rounded-lg p-3 w-60 flex items-center justify-between">
-                        <span className="text-white font-custom">Destination:</span>
-                        <span className="text-white">{status.destinationStation}</span>
                     </div>
                 </div>
             )}

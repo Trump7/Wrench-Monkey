@@ -33,6 +33,22 @@ const Tools = ({ admin }) => {
   const [jobToRemove, setJobToRemove] = useState(null);
   const [jobToEdit, setJobToEdit] = useState({id: null,name: '',tools: []});
 
+  //robot status
+  const [status, setStatus] = useState(null);
+
+  const fetchInitialStatus = async () => {
+    try {
+        const response = await axios.get(`${config.apiURL}/status`);
+        setStatus(prevStatus => ({
+            ...response.data,
+            lastChecked: new Date().toISOString()
+        }));
+    } catch (error) {
+        console.error('Error fetching initial status:', error);
+    }
+};
+
+
   const fetchTools = async () => {
     try {
       const response = await axios.get(`${config.apiURL}/tools`);
@@ -53,15 +69,22 @@ const Tools = ({ admin }) => {
   
 
   useEffect(() => {
-    fetchTools(); // Fetch initial tools
+    fetchTools();
     fetchJobs();
+    fetchInitialStatus();  // Fetch initial status
 
-    const cleanupEventSource = eventSourceManager(() => {}, setTools, () => {}); // Only setTools handler
+    const cleanupEventSource = eventSourceManager((newStatus) => {
+        setStatus(prevStatus => ({
+            ...newStatus,
+            lastChecked: new Date().toISOString()
+        }));
+    }, setTools, setJobs);
 
     return () => {
         cleanupEventSource();
     };
-}, []);
+  }, []);
+
 
   const handleAddTool = async () => {
     if (tools.length >= 4) {
@@ -251,6 +274,12 @@ const Tools = ({ admin }) => {
   
 
   const handleCheckout = async (toolId) => {
+    if (!status?.isConnected) {
+      setErrorMessage('Cannot check out tool. Robot is not connected.');
+      setShowErrorPopup(true);
+      return;
+    }
+    
     const tool = tools.find(t => t._id === toolId);
     if (tool.status !== '1') {
       setErrorMessage('Tool is not available for checkout.');
@@ -262,6 +291,12 @@ const Tools = ({ admin }) => {
   };
 
   const handleCheckoutJob = async (jobId) => {
+    if (!status?.isConnected) {
+      setErrorMessage('Cannot check out tool. Robot is not connected.');
+      setShowErrorPopup(true);
+      return;
+    }
+
     const job = jobs.find(j => j._id === jobId);
     
     // Debugging logs
