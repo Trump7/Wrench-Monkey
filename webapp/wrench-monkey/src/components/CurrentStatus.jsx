@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import '../index.css';
 import config from '../config';
-import robot from '../assets/logo.jpg';
+import track from '../assets/track.png';
 import { eventSourceManager } from '../utilities/eventSource';
 
 const CurrentStatus = () => {
@@ -78,9 +78,6 @@ const CurrentStatus = () => {
         <div>
             <h2 className="bg-gray-700 p-4 rounded-lg mb-4 text-white font-custom text-center text-2xl">Current Status</h2>
             <div className="flex justify-center mb-6">
-                {/* <img src={robot} alt="Robot" className="w-60 h-auto rounded" /> */}
-            </div>
-            <div className="flex justify-center mb-6">
                 <div className="bg-gray-700 rounded-lg p-3 w-96 flex flex-col items-start">
                     <div className="flex items-center justify-between w-full mb-2">
                         <span className="text-white font-custom">Connected:</span>
@@ -103,6 +100,9 @@ const CurrentStatus = () => {
                     <span className="text-white font-custom">Traveling:</span>
                     <span className={`w-40 h-6 rounded-full ${status.isTraveling ? 'bg-green-500' : 'bg-red-500'}`}></span>
                 </div>
+            </div>
+            <div className="flex justify-center mb-6">
+                <img src={track} alt="Robot Track" className="w-90 h-auto rounded" />
             </div>
             {!status.isTraveling && (
                 <div>
