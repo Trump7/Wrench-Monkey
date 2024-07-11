@@ -5,7 +5,7 @@ import robot from '../../src/assets/roboto.png';
 const Home = () => {
     return (
         <div style={{ backgroundColor: '#00001B' }} className="min-h-screen text-white">
-            <div className="container mx-auto py-8 px-4">
+            <div className="container mx-auto py-8 px-4 min-w-[1280px]">
                 {/* Two Columns */}
                 <div className="flex flex-col md:flex-row items-center justify-between">
                     {/* Left Column: Robot Image */}

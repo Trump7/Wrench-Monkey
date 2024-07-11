@@ -349,7 +349,7 @@ const Tools = ({ admin }) => {
   const availableSlots = [1, 2, 3, 4];
 
   return (
-    <div className="h-screen flex flex-col">
+    <div className="h-screen min-h-[750px] flex flex-col">
       <h2 className="bg-gray-700 p-4 rounded-lg mb-4 text-white font-custom font-bold text-center text-2xl">Tools</h2>
       {admin && (
         <div className="flex justify-center mb-6">

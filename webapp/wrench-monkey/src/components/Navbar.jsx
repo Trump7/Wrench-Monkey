@@ -16,7 +16,7 @@ const Navbar = () => {
 
     return (
         <header style={{ backgroundColor: '#00001B' }}>
-            <nav className="container mx-auto flex justify-between items-center py-4 min-w-[800px]">
+            <nav className="container mx-auto flex justify-between items-center py-4 min-w-[1280px]">
                 {/* Wrench Monkey Logo */}
                 <NavLink to="/" className="flex items-center gap-2 text-white">
                     <img src={logo} alt="Wrench Monkey Logo" className="h-20 w-auto" />

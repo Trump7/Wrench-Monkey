@@ -34,7 +34,7 @@ const teamMembers = [
 const About = () => {
     return (
         <div style={{ backgroundColor: '#00001B' }} className="min-h-screen text-white">
-            <div className="container mx-auto py-8 px-4">
+            <div className="min-w-[1280px] container mx-auto py-8 px-4">
                 {teamMembers.map((member, index) => (
                     <div key={index} className={`flex flex-col md:flex-row items-center justify-center mb-8 ${index % 2 === 0 ? 'md:flex-row-reverse' : ''}`}>
                         <div className="md:w-1/3 p-4 flex justify-center max-w-xs">
