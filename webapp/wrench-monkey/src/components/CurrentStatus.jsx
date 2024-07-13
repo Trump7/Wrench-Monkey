@@ -3,6 +3,8 @@ import axios from 'axios';
 import '../index.css';
 import config from '../config';
 import track from '../assets/track.png';
+import robotImage from '../assets/happyrobo.png'
+import spinningGear from '../assets/gear.gif';
 import { eventSourceManager } from '../utilities/eventSource';
 
 const CurrentStatus = () => {
@@ -26,7 +28,7 @@ const CurrentStatus = () => {
     };
 
     const handleStationClick = (station) => {
-        if(!status.isConnected){
+        if (!status.isConnected) {
             setErrorMessage('Cannot travel to station. Robot is not connected.');
             setShowErrorPopup(true);
             return;
@@ -76,7 +78,7 @@ const CurrentStatus = () => {
                 ...newStatus,
                 lastChecked: new Date().toISOString()
             }));
-        }, () => {}, () => {}); // Only setStatus handler
+        }, () => { }, () => { }); // Only setStatus handler
 
         return () => {
             cleanupEventSource();
@@ -87,9 +89,18 @@ const CurrentStatus = () => {
         return <div>Loading...</div>;
     }
 
+    const getStationCircleClass = (station) => {
+        return `w-10 h-10 flex items-center justify-center rounded-full text-white font-bold text-xl ${
+            status.currentStation === station ? 'bg-green-500' : 'bg-red-500'
+        }`;
+    };
+
     return (
         <div className="h-screen min-h-[750px]">
             <h2 className="bg-gray-700 p-4 rounded-lg mb-4 text-white font-custom text-center text-2xl">Current Status</h2>
+            <div className="flex justify-center">
+                <img src={robotImage} alt="Robot" style={{ width: '190px', height: 'auto' }} className="rounded" />
+            </div>
             <div className="flex justify-center mb-6">
                 <div className="bg-gray-700 rounded-lg p-3 w-96 flex flex-col items-start">
                     <div className="flex items-center justify-between w-full mb-2">
@@ -122,8 +133,22 @@ const CurrentStatus = () => {
                     </div>
                 </div>
             )}
-            <div className="flex justify-center mb-6">
+            <div className="relative flex justify-center mb-6">
                 <img src={track} alt="Robot Track" className="w-90 h-auto rounded" />
+                <div className="absolute" style={{ left: '-13px', top: '50%', transform: 'translateY(-50%)' }}>
+                    <div className={`${getStationCircleClass('Station A')} w-16 h-16`}>A</div>
+                </div>
+                <div className="absolute" style={{ left: '50%', bottom: '-13px', transform: 'translateX(-50%)' }}>
+                    <div className={`${getStationCircleClass('Station B')} w-16 h-16`}>B</div>
+                </div>
+                <div className="absolute" style={{ right: '-13px', top: '50%', transform: 'translateY(-50%)' }}>
+                    <div className={`${getStationCircleClass('Station C')} w-16 h-16`}>C</div>
+                </div>
+                {status.isTraveling && (
+                    <img src={spinningGear} alt="Spinning Gear" 
+                        style={{ width: '120px', height: '120px' }} 
+                        className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+                )}
             </div>
             {!status.isTraveling && (
                 <div>
@@ -154,7 +179,7 @@ const CurrentStatus = () => {
                 <div className="flex justify-center mb-6">
                     <button
                         onClick={handleEmergencyStop}
-                        className="font-custom bg-red-500 hover:bg-red-700 text-white py-2 px-4 rounded"
+                        className="font-custom bg-red-500 hover:bg-red-700 text-white py-2 px-4 rounded text-2xl"
                     >
                         EMERGENCY STOP
                     </button>
