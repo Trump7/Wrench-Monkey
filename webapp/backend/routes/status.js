@@ -40,7 +40,7 @@ router.get('/', async (req, res) => {
     const combinedStatus = {
       _id: status._id,
       isConnected: status.isConnected,
-      lastChecked: status.lastChecked,
+      lastChecked: new Date().toISOString(),
       currentStation: status.currentStation,
       isTraveling: status.isTraveling,
       destinationStation: status.destinationStation,
@@ -55,6 +55,9 @@ router.get('/', async (req, res) => {
         userDetails: toolStatus.checkedOutBy ? usersMap[toolStatus.checkedOutBy] : null
       }))
     };
+
+    // Save the updated status back to the database
+    await Status.findByIdAndUpdate(status._id, { lastChecked: combinedStatus.lastChecked });
 
     res.status(200).json(combinedStatus);
   } catch (err) {
