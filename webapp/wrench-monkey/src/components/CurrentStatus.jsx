@@ -99,7 +99,7 @@ const CurrentStatus = () => {
         <div className="h-screen min-h-[750px]">
             <h2 className="bg-gray-700 p-4 rounded-lg mb-4 text-white font-custom text-center text-2xl">Current Status</h2>
             <div className="flex justify-center">
-                <img src={robotImage} alt="Robot" style={{ width: '190px', height: 'auto' }} className="rounded" />
+                {/* <img src={robotImage} alt="Robot" style={{ width: '190px', height: 'auto' }} className="rounded" /> */}
             </div>
             <div className="flex justify-center mb-6">
                 <div className="bg-gray-700 rounded-lg p-3 w-96 flex flex-col items-start">
@@ -133,7 +133,7 @@ const CurrentStatus = () => {
                     </div>
                 </div>
             )}
-            <div className="relative flex justify-center mb-6">
+            <div className="relative flex justify-center mb-6 z-10">
                 <img src={track} alt="Robot Track" className="w-90 h-auto rounded" />
                 <div className="absolute" style={{ left: '-13px', top: '50%', transform: 'translateY(-50%)' }}>
                     <div className={`${getStationCircleClass('Station A')} w-16 h-16`}>A</div>
@@ -186,7 +186,7 @@ const CurrentStatus = () => {
                 </div>
             )}
             {showPrompt && (
-                <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-black bg-opacity-50">
+                <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-black bg-opacity-50 z-50">
                     <div className="bg-white p-6 rounded-lg w-1/3">
                         <h3 className="text-lg font-custom font-bold mb-4">Confirm Travel</h3>
                         <p className="font-custom mb-4">Are you sure you want the robot to travel to station {selectedStation}?</p>
@@ -208,7 +208,7 @@ const CurrentStatus = () => {
                 </div>
             )}
             {showErrorPopup && (
-                <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-black bg-opacity-50">
+                <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-black bg-opacity-50 z-50">
                     <div className="bg-white p-6 rounded-lg w-1/3">
                         <h3 className="text-lg font-custom font-bold mb-4">Error</h3>
                         <p className="font-custom mb-4">{errorMessage}</p>
