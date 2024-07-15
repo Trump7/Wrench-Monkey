@@ -1,18 +1,62 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import logo from '../../src/assets/logo.jpg';
 import { NavLink } from 'react-router-dom';
 import Button from './Button'; // Import the Button component
 import { isAuthenticated } from '../utilities/auth';
 import Cookies from 'js-cookie';
+import {jwtDecode} from 'jwt-decode';
+import config from '../config';
 import '../index.css';
 
 const Navbar = () => {
+    const [user, setUser] = useState(null);
     const navItems = [
         { path: "/About", title: "About Us" },
         { path: "/Manual", title: "Manual" },
     ];
 
     const authenticated = isAuthenticated();
+
+    useEffect(() => {
+        if (authenticated) {
+            fetchUser();
+        }
+    }, [authenticated]);
+
+    const fetchUser = async () => {
+        const token = Cookies.get('token');
+        if (!token) {
+            console.error('No token found');
+            return;
+        }
+
+        try {
+            const decodedToken = jwtDecode(token);
+            const userId = decodedToken.id;
+
+            if (!userId) {
+                console.error('No userId found in token');
+                return;
+            }
+
+            const response = await fetch(`${config.apiURL}/users/${userId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            setUser(data);
+
+        } catch (error) {
+            console.error('Error fetching user:', error);
+        }
+    };
 
     return (
         <header style={{ backgroundColor: '#00001B' }}>
@@ -53,8 +97,14 @@ const Navbar = () => {
                 {/* Space between Nav Links and Buttons */}
                 <div className="hidden md:block w-4"></div>
 
-                {/* Buttons Component Aligned to the Right */}
+                {/* User Info and Buttons Component Aligned to the Right */}
                 <div className="flex items-center space-x-4 font-custom mr-8">
+                    {authenticated && user && (
+                        <div className="text-white">
+                            <div>Logged in as</div>
+                            <div>{user.name}</div>
+                        </div>
+                    )}
                     {authenticated ? (
                         <Button onClick={handleLogout} text="Log Out" />
                     ) : (
