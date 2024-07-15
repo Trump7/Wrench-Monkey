@@ -55,7 +55,7 @@ const Register = () => {
             <div className="bg-box rounded-lg p-4 max-w-md w-2/5 flex flex-col items-center">
                 <form onSubmit={handleSubmit} className="w-full max-w-xs">
                     <div className="mb-1">
-                        <label htmlFor="name" className="block text-sm font-custom mb-1">Full Name:</label>
+                        <label htmlFor="name" className="block text-xl font-custom mb-1">Full Name:</label>
                         <input
                             type="text"
                             id="name"
@@ -66,7 +66,7 @@ const Register = () => {
                         />
                     </div>
                     <div className="mb-1">
-                        <label htmlFor="robot" className="block text-sm font-custom mb-1">Robot Number:</label>
+                        <label htmlFor="robot" className="block text-xl font-custom mb-1">Robot Number:</label>
                         <input
                             type="text"
                             id="robot"
@@ -77,7 +77,7 @@ const Register = () => {
                         />
                     </div>
                     <div className="mb-1">
-                        <label htmlFor="email" className="block text-sm font-custom mb-1">Email:</label>
+                        <label htmlFor="email" className="block text-xl font-custom mb-1">Email:</label>
                         <input
                             type="text"
                             id="email"
@@ -88,7 +88,7 @@ const Register = () => {
                         />
                     </div>
                     <div className="mb-1">
-                        <label htmlFor="password" className="block text-sm font-custom mb-1">Password:</label>
+                        <label htmlFor="password" className="block text-xl font-custom mb-1">Password:</label>
                         <input
                             type="password"
                             id="password"
@@ -99,7 +99,7 @@ const Register = () => {
                         />
                     </div>
                     <div className="mb-1">
-                        <label htmlFor="confirmpassword" className="block text-sm font-custom mb-1">Confirm Password:</label>
+                        <label htmlFor="confirmpassword" className="block text-xl font-custom mb-1">Confirm Password:</label>
                         <input
                             type="password"
                             id="confirmpassword"

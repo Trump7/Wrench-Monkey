@@ -78,7 +78,7 @@ const Tools = ({ admin }) => {
             ...newStatus,
             lastChecked: new Date().toISOString()
         }));
-    }, setTools, setJobs);
+    }, setTools);
 
     return () => {
         cleanupEventSource();
@@ -319,8 +319,8 @@ const Tools = ({ admin }) => {
       const userId = getUserId();
       const timestamp = new Date().toISOString();
       await axios.post(`${config.apiURL}/jobs/checkout`, { jobId, userId, timestamp });
-      fetchTools();
-      fetchJobs();
+      // fetchTools();
+      // fetchJobs();
       setShowCheckoutJobPopup(false);
       setCheckoutJob(null);
     } catch (error) {
