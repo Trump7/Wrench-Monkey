@@ -41,13 +41,26 @@ const About = () => {
                             <img src={member.image} alt={`${member.name}`} className="w-full h-auto rounded-lg" />
                         </div>
                         <div className="md:w-2/3 p-4 flex flex-col items-center md:items-start">
-                            <h2 className="text-3xl font-bold mb-2">{member.name}</h2>
-                            <h3 className="text-xl mb-1">{member.role}</h3>
-                            <p className="text-lg italic mb-2">{member.degree}</p>
+                            <h2 className="text-3xl font-bold mb-2 font-custom">{member.name}</h2>
+                            <h3 className="text-xl mb-1 font-custom">{member.role}</h3>
+                            <p className="text-lg italic mb-2 font-custom">{member.degree}</p>
                             <p className="text-lg text-center md:text-left">{member.description}</p>
                         </div>
                     </div>
                 ))}
+            </div>
+            <div className="bg-gray-800 w-full py-4 text-center">
+                <p className="text-lg mb-2 font-custom">
+                    As part of our Senior Design project, we decided to make this project completely open source.
+                </p>
+                <p className="text-lg mb-2 font-custom">
+                    Check out the repositories on GitHub:
+                </p>
+                <p className="text-lg">
+                    <a href="https://github.com/Trump7/Wrench-Monkey" className="font-custom text-green-400 hover:underline" target="_blank" rel="noopener noreferrer">Website Repository</a>
+                    <span className="mx-4">|</span>
+                    <a href="https://github.com/Trump7/Wrench-Monkey-App" className="font-custom text-green-400 hover:underline" target="_blank" rel="noopener noreferrer">App Repository</a>
+                </p>
             </div>
         </div>
     );
