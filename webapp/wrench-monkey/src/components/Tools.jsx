@@ -523,7 +523,7 @@ const Tools = ({ admin }) => {
         </div>
       )}
       {showAddPopup && (
-        <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-black bg-opacity-50 z-50">
+        <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-black bg-opacity-50 z-50 font-custom">
           <div className="bg-white p-6 rounded-lg w-1/3">
             <h3 className="text-lg font-bold mb-4">Add New Tool</h3>
             <input type="text" name="name" value={newTool.name} onChange={handleChange} placeholder="Enter tool name" className="border border-gray-300 rounded-md p-2 mb-4 w-full" />
@@ -549,7 +549,7 @@ const Tools = ({ admin }) => {
         </div>
       )}
       {showRemovePopup && (
-        <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-black bg-opacity-50 z-50">
+        <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-black bg-opacity-50 z-50 font-custom">
           <div className="bg-white p-6 rounded-lg w-1/3">
             <h3 className="text-lg font-bold mb-4">Are you sure you would like to remove this item?</h3>
             <div className="flex justify-end">
@@ -568,7 +568,7 @@ const Tools = ({ admin }) => {
         </div>
       )}
       {showEditPopup && (
-        <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-black bg-opacity-50 z-50">
+        <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-black bg-opacity-50 z-50 font-custom">
           <div className="bg-white p-6 rounded-lg w-1/3">
             <h3 className="text-lg font-bold mb-4">Edit Tool</h3>
             <input type="text" name="name" value={toolToEdit.name} onChange={handleEditChange} placeholder="Enter tool name" className="border border-gray-300 rounded-md p-2 mb-4 w-full" />
