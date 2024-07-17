@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { EyeIcon, EyeOffIcon } from '@heroicons/react/solid';
 import Button from '../components/Button.jsx'; // Import the Button component
 import config from '../config.js';
 
@@ -11,40 +12,56 @@ const Register = () => {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
 
-    const [error, setError] = useState('');
-    const [emailError, setEmailError] = useState(false);
-    const [passwordError, setPasswordError] = useState(false);
-    const [passwordMismatchError, setPasswordMismatchError] = useState(false);
+    const [errors, setErrors] = useState({});
+    const [passwordVisible, setPasswordVisible] = useState(false);
+    const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
 
     const navigate = useNavigate();
 
+    const validateEmail = (email) => {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(String(email).toLowerCase());
+    };
+
+    const validatePasswordComplexity = (password) => {
+        return password.length >= 8;
+    };
+
+    const validateRobotNumber = (robot) => {
+        return /^\d+$/.test(robot);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
-        setEmailError(false);
-        setPasswordError(false);
-        setPasswordMismatchError(false);
+        const newErrors = {};
 
-        if (password !== confirmPassword) {
-            setPasswordMismatchError(true);
-            setError('Passwords do not match');
-            return;
-        }
+        if (!name) newErrors.name = 'Full Name is required';
+        if (!robot) newErrors.robot = 'Robot Number is required';
+        else if (!validateRobotNumber(robot)) newErrors.robot = 'Robot Number must be a number';
+        if (!email) newErrors.email = 'Email is required';
+        else if (!validateEmail(email)) newErrors.email = 'Invalid email address';
+        if (!password) newErrors.password = 'Password is required';
+        else if (!validatePasswordComplexity(password)) newErrors.password = 'Password must be at least 8 characters long';
+        if (!confirmPassword) newErrors.confirmPassword = 'Please confirm your password';
+        else if (password !== confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
 
-        try {
-            await axios.post(`${config.apiURL}/auth/register`, {
-                name,
-                email,
-                pass: password,
-            });
-            setError('');
-            navigate('/login');
-        } catch (error) {
-            if (error.response && error.response.status === 400) {
-                setEmailError(true);
-                setError('Email already in use');
-            } else {
-                setError('Error registering user');
+        setErrors(newErrors);
+
+        if (Object.keys(newErrors).length === 0) {
+            try {
+                await axios.post(`${config.apiURL}/auth/register`, {
+                    name,
+                    email,
+                    pass: password,
+                });
+                setErrors({});
+                navigate('/login');
+            } catch (error) {
+                if (error.response && error.response.status === 400) {
+                    setErrors({ email: 'Email already in use' });
+                } else {
+                    setErrors({ api: 'Error registering user' });
+                }
             }
         }
     };
@@ -62,8 +79,9 @@ const Register = () => {
                             name="name"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
-                            className="w-full px-3 py-2 font-custom border rounded-lg focus:outline focus:border-blue-500"
+                            className={`w-full px-3 py-2 font-custom border rounded-lg focus:outline ${errors.name ? 'border-red-500' : 'focus:border-blue-500'}`}
                         />
+                        {errors.name && <div className="text-red-500 text-sm font-custom">{errors.name}</div>}
                     </div>
                     <div className="mb-1">
                         <label htmlFor="robot" className="block text-xl font-custom mb-1">Robot Number:</label>
@@ -73,10 +91,11 @@ const Register = () => {
                             name="robot"
                             value={robot}
                             onChange={(e) => setRobot(e.target.value)}
-                            className="w-full px-3 py-2 font-custom border rounded-lg focus:outline focus:border-blue-500"
+                            className={`w-full px-3 py-2 font-custom border rounded-lg focus:outline ${errors.robot ? 'border-red-500' : 'focus:border-blue-500'}`}
                         />
+                        {errors.robot && <div className="text-red-500 text-sm font-custom">{errors.robot}</div>}
                     </div>
-                    <div className="mb-1">
+                    <div className="mb-1 relative">
                         <label htmlFor="email" className="block text-xl font-custom mb-1">Email:</label>
                         <input
                             type="text"
@@ -84,33 +103,50 @@ const Register = () => {
                             name="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className={`w-full px-3 py-2 font-custom border rounded-lg focus:outline ${emailError ? 'border-red-500' : 'focus:border-blue-500'}`}
+                            className={`w-full px-3 py-2 font-custom border rounded-lg focus:outline ${errors.email ? 'border-red-500' : 'focus:border-blue-500'}`}
                         />
+                        {errors.email && <div className="text-red-500 text-sm font-custom">{errors.email}</div>}
                     </div>
-                    <div className="mb-1">
+                    <div className="mb-1 relative">
                         <label htmlFor="password" className="block text-xl font-custom mb-1">Password:</label>
                         <input
-                            type="password"
+                            type={passwordVisible ? 'text' : 'password'}
                             id="password"
                             name="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className={`w-full px-3 py-2 font-custom border rounded-lg focus:outline ${passwordError || passwordMismatchError ? 'border-red-500' : 'focus:border-blue-500'}`}
+                            className={`w-full px-3 py-2 font-custom border rounded-lg focus:outline ${errors.password ? 'border-red-500' : 'focus:border-blue-500'}`}
                         />
+                        <button
+                            type="button"
+                            className="absolute right-2 top-10"
+                            onClick={() => setPasswordVisible(!passwordVisible)}
+                        >
+                            {passwordVisible ? <EyeOffIcon className="h-7 w-7 text-gray-700" /> : <EyeIcon className="h-7 w-7 text-gray-700" />}
+                        </button>
+                        {errors.password && <div className="text-red-500 text-sm font-custom">{errors.password}</div>}
                     </div>
-                    <div className="mb-1">
+                    <div className="mb-1 relative">
                         <label htmlFor="confirmpassword" className="block text-xl font-custom mb-1">Confirm Password:</label>
                         <input
-                            type="password"
+                            type={confirmPasswordVisible ? 'text' : 'password'}
                             id="confirmpassword"
                             name="confirmpassword"
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
-                            className={`mb-4 w-full px-3 py-2 font-custom border rounded-lg focus:outline ${passwordMismatchError ? 'border-red-500' : 'focus:border-blue-500'}`}
+                            className={`w-full px-3 py-2 font-custom border rounded-lg focus:outline ${errors.confirmPassword ? 'border-red-500' : 'focus:border-blue-500'}`}
                         />
+                        <button
+                            type="button"
+                            className="absolute right-2 top-10"
+                            onClick={() => setConfirmPasswordVisible(!confirmPasswordVisible)}
+                        >
+                            {confirmPasswordVisible ? <EyeOffIcon className="h-7 w-7 text-gray-700" /> : <EyeIcon className="h-7 w-7 text-gray-700" />}
+                        </button>
+                        {errors.confirmPassword && <div className="text-red-500 text-sm font-custom">{errors.confirmPassword}</div>}
                     </div>
-                    {error && <div className="text-red-500 text-md mb-2 font-custom">{error}</div>}
-                    <div className="flex justify-center font-custom">
+                    {errors.api && <div className="text-red-500 text-md mb-2 font-custom">{errors.api}</div>}
+                    <div className="mt-5 flex justify-center font-custom">
                         <Button onClick={handleSubmit} text="Register"/>
                     </div>
                 </form>
